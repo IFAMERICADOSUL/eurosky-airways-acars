@@ -2,359 +2,933 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#071426">
-<title>EuroSky Airways | Smart ACARS</title>
-<style>
-:root{--bg:#071426;--panel:#102139;--panel2:#142b46;--border:#263b54;--text:#eef5ff;--muted:#9db1c9;--accent:#54c8ff;--button:#168bd0;--danger:#d95757;--success:#48c78e}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-button:disabled{opacity:.55;cursor:not-allowed}
-a{color:var(--accent);text-decoration:none}
-.hidden{display:none!important}
-.muted{color:var(--muted)}
-.small{font-size:13px;line-height:1.6}
-.layout{min-height:100vh}
-.sidebar{position:fixed;inset:0 auto 0 0;width:250px;padding:22px 16px;background:#0a192c;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:22px;z-index:20;transition:transform .2s}
-.brand{font-size:20px;font-weight:800;padding:8px}
-.brand span{color:var(--accent)}
-.nav-label{font-size:11px;letter-spacing:2px;color:var(--muted);padding:0 10px}
-.nav-button{width:100%;border:0;background:transparent;color:var(--muted);text-align:left;padding:13px 12px;border-radius:9px;margin:3px 0}
-.nav-button:hover,.nav-button.active{background:var(--panel2);color:var(--text)}
-.sidebar-bottom{margin-top:auto}
-.main{margin-left:250px;min-width:0}
-.topbar{min-height:76px;padding:16px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:15px;background:rgba(7,20,38,.95);position:sticky;top:0;z-index:10}
-.topbar h1{font-size:21px;margin:0}
-.content{max-width:1400px;margin:auto;padding:28px}
-.page{display:none}
-.page.active{display:block}
-.hero{padding:30px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(120deg,#163a5c,#102139 65%,#0b1a2e);margin-bottom:24px}
-.eyebrow{color:var(--accent);font-size:11px;letter-spacing:2px;font-weight:bold}
-h2{font-size:23px;margin:0 0 14px}
-h3{font-size:17px;margin:0 0 12px}
-p{line-height:1.65}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:22px}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:22px;min-width:0}
-.metric{font-size:29px;font-weight:800;margin-top:12px;overflow-wrap:anywhere}
-.metric-label{font-size:13px;color:var(--muted)}
-.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-label{display:block;font-size:13px;margin:12px 0 7px;color:#cfdef0}
-input,select,textarea{width:100%;padding:12px;background:var(--bg);color:var(--text);border:1px solid #3b506a;border-radius:8px;min-width:0}
-input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
-button.primary{background:var(--button);color:white;border:0;border-radius:8px;padding:12px 16px;font-weight:bold}
-button.secondary{background:#263950;color:var(--text);border:1px solid #3b506a;border-radius:8px;padding:11px 14px}
-button.danger{background:#582b35;color:#fff;border:1px solid #83414b;border-radius:8px;padding:11px 14px}
-button.full{width:100%;margin-top:12px}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-.actions button{flex:1}
-.message{min-height:22px;overflow-wrap:anywhere;font-size:13px;line-height:1.6}
-.message.error{color:#ff9696}
-.message.ok{color:#76e2b1}
-.badge{display:inline-block;padding:5px 9px;border-radius:99px;background:#243d58;color:#bcd7f1;font-size:12px}
-.badge.good{color:#8de9bc;background:#153e36}
-.badge.warn{color:#ffd68a;background:#493a22}
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px;min-width:580px}
-th,td{text-align:left;padding:13px 10px;border-bottom:1px solid var(--border)}
-th{color:var(--muted);font-weight:600}
-.empty{padding:22px 0;color:var(--muted);font-size:14px}
-.map-placeholder{min-height:300px;border:1px dashed #47627e;border-radius:14px;display:grid;place-content:center;text-align:center;padding:25px;background:radial-gradient(ellipse at center,#173552,#0a192b 70%)}
-.map-icon{font-size:46px;margin-bottom:10px}
-.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px}
-.mobile-menu{display:none}
-footer{text-align:center;padding:25px;color:var(--muted);font-size:12px}
-#authScreen{max-width:480px;margin:8vh auto;padding:22px}
-#authScreen .card{padding:28px}
-hr{border:0;border-top:1px solid var(--border);margin:20px 0}
-@media(max-width:1050px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:760px){
-.sidebar{transform:translateX(-100%);box-shadow:none}
-body.menu-open .sidebar{transform:translateX(0);box-shadow:0 0 0 100vmax #0009}
-.main{margin-left:0}
-.mobile-menu{display:inline-block}
-.topbar{padding:14px 16px}
-.content{padding:17px}
-.grid,.form-grid{grid-template-columns:1fr}
-.hero{padding:22px}
-.card{padding:18px}
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071426">
+  <title>EuroSky Airways | Smart ACARS</title>
+
+  <style>
+    :root {
+      --bg: #071426;
+      --panel: #101f35;
+      --panel2: #152943;
+      --border: #29415e;
+      --text: #eef5ff;
+      --muted: #9db0c9;
+      --blue: #4da3ff;
+      --green: #45d6a0;
+      --red: #ff7373;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(145deg, #071426, #0c1c32);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 22px 18px;
+      border-bottom: 1px solid var(--border);
+      background: #09172a;
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .brand span { color: var(--blue); }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 5px;
+      letter-spacing: 2px;
+    }
+
+    .badge {
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 8px 12px;
+      color: var(--green);
+      font-size: 12px;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 24px 16px 50px;
+    }
+
+    .hero { margin-bottom: 24px; }
+
+    h1 {
+      font-size: clamp(26px, 5vw, 38px);
+      margin: 0 0 10px;
+    }
+
+    h2 { margin-top: 0; font-size: 20px; }
+
+    p { line-height: 1.55; }
+
+    .muted { color: var(--muted); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .panel {
+      background: rgba(16, 31, 53, .96);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      min-width: 0;
+    }
+
+    .wide { grid-column: 1 / -1; }
+
+    label {
+      display: block;
+      color: #cbd9eb;
+      font-size: 13px;
+      margin: 14px 0 7px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: #09172a;
+      color: var(--text);
+      font-size: 15px;
+      min-height: 44px;
+    }
+
+    input:focus, select:focus {
+      outline: 2px solid var(--blue);
+      outline-offset: 1px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 9px;
+      padding: 12px 16px;
+      background: var(--blue);
+      color: #061326;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      min-height: 44px;
+    }
+
+    button:disabled {
+      opacity: .6;
+      cursor: wait;
+    }
+
+    button.secondary {
+      background: var(--panel2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    button.danger {
+      background: #542c39;
+      color: #fff;
+      border: 1px solid #824455;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .actions button { flex: 1; }
+
+    .message {
+      display: none;
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 9px;
+      overflow-wrap: anywhere;
+      font-size: 14px;
+    }
+
+    .message.success {
+      display: block;
+      background: #103a32;
+      border: 1px solid #277b68;
+      color: #b7ffe8;
+    }
+
+    .message.error {
+      display: block;
+      background: #421f2b;
+      border: 1px solid #854052;
+      color: #ffd3dc;
+    }
+
+    .message.info {
+      display: block;
+      background: #142d4a;
+      border: 1px solid #315b84;
+      color: #d3e9ff;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .stat {
+      background: #0a192c;
+      border: 1px solid var(--border);
+      padding: 15px;
+      border-radius: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    th { color: var(--muted); }
+
+    .hidden { display: none !important; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      text-align: center;
+      padding: 22px 15px;
+      font-size: 12px;
+    }
+
+    @media (max-width: 700px) {
+      .grid { grid-template-columns: 1fr; }
+      .wide { grid-column: auto; }
+      .stats { grid-template-columns: 1fr; }
+      .panel { padding: 17px; }
+      .brand { font-size: 18px; }
+    }
+  </style>
 </head>
+
 <body>
+  <header>
+    <div class="header-inner">
+      <div>
+        <div class="brand">EURO<span>SKY</span> AIRWAYS</div>
+        <div class="subtitle">SMART ACARS · VIRTUAL AIRLINE</div>
+      </div>
+      <div class="badge">● PILOT OPERATIONS</div>
+    </div>
+  </header>
 
-<section id="authScreen">
-<div class="brand">✈ EuroSky <span>Airways</span></div>
-<div class="card">
-<div class="eyebrow">PILOT OPERATIONS</div>
-<h2 id="authTitle" style="margin-top:12px">Pilot Sign In</h2>
-<p class="muted small" id="authDescription">Sign in to access your pilot portal.</p>
-<form id="authForm">
-<div id="registerFields" class="hidden">
-<label for="fullName">Full Name</label>
-<input id="fullName" maxlength="100" autocomplete="name">
-<label for="callsign">Pilot Callsign</label>
-<input id="callsign" maxlength="30" placeholder="e.g. EuroSky001">
-</div>
-<label for="email">Email Address</label>
-<input id="email" type="email" required maxlength="254" autocomplete="email">
-<label for="password">Password</label>
-<input id="password" type="password" required minlength="8" autocomplete="current-password">
-<button class="primary full" id="authSubmit" type="submit">Sign In</button>
-</form>
-<button class="secondary full" id="authMode" type="button">Create Account</button>
-<p id="authMessage" class="message" aria-live="polite"></p>
-</div>
-<p class="muted small" style="text-align:center">EuroSky Airways · Smart ACARS</p>
-</section>
+  <main>
+    <section class="hero">
+      <h1>Smart ACARS Portal</h1>
+      <p class="muted">
+        Pilot account, flight reporting and flight history.
+        Sign in to access your pilot dashboard.
+      </p>
+    </section>
 
-<div id="app" class="layout hidden">
-<aside class="sidebar">
-<div class="brand">✈ EuroSky <span>Airways</span></div>
-<div class="nav-label">FLIGHT OPERATIONS</div>
-<nav>
-<button class="nav-button active" data-page="dashboard">▦ &nbsp; Dashboard</button>
-<button class="nav-button" data-page="flightcenter">✈ &nbsp; Flight Center</button>
-<button class="nav-button" data-page="livemap">◎ &nbsp; Live Map</button>
-<button class="nav-button" data-page="reports">▤ &nbsp; PIREP Center</button>
-<button class="nav-button" data-page="history">◷ &nbsp; Flight History</button>
-</nav>
-<div class="nav-label">PILOT ACCOUNT</div>
-<nav>
-<button class="nav-button" data-page="profile">♙ &nbsp; Pilot Profile</button>
-<button class="nav-button" data-page="statistics">▥ &nbsp; Statistics</button>
-</nav>
-<div class="sidebar-bottom">
-<div class="muted small" id="sidebarPilot">Pilot account</div>
-<button class="secondary full" id="signOut">Sign Out</button>
-</div>
-</aside>
+    <section id="authSection" class="grid">
+      <div class="panel">
+        <h2>Pilot Login</h2>
+        <p class="muted">Sign in to your EuroSky Airways account.</p>
 
-<div class="main">
-<header class="topbar">
-<div class="row" style="justify-content:flex-start">
-<button id="menuToggle" class="secondary mobile-menu" aria-label="Open navigation">☰</button>
-<h1 id="pageTitle">Pilot Dashboard</h1>
-</div>
-<span class="badge" id="sessionBadge">Signed In</span>
-</header>
+        <form id="loginForm">
+          <label for="loginEmail">Email address</label>
+          <input id="loginEmail" type="email" autocomplete="email"
+                 required placeholder="pilot@example.com">
 
-<main class="content">
-<section class="page active" id="page-dashboard">
-<div class="hero">
-<div class="eyebrow">VIRTUAL AIRLINE · FLIGHT OPERATIONS</div>
-<h2 style="font-size:30px;margin-top:14px">Welcome aboard, <span id="welcomeName">Pilot</span>.</h2>
-<p class="muted">Manage your flights, submit reports and track your progress with EuroSky Airways.</p>
-<div class="actions">
-<button class="primary" data-go="flightcenter">Plan a Flight</button>
-<button class="secondary" data-go="livemap">Open Live Map</button>
-</div>
-</div>
-<div class="stats">
-<div class="card"><div class="metric-label">Pilot Number</div><div class="metric" id="metricPilot">—</div></div>
-<div class="card"><div class="metric-label">Completed Flights</div><div class="metric" id="metricFlights">0</div></div>
-<div class="card"><div class="metric-label">Flight Hours</div><div class="metric" id="metricHours">0.0</div></div>
-<div class="card"><div class="metric-label">Nautical Miles</div><div class="metric" id="metricMiles">0</div></div>
-</div>
-<div class="grid">
-<div class="card">
-<h3>Smart ACARS Status</h3>
-<p><span class="badge warn">Telemetry not connected</span></p>
-<p class="muted small">Flight planning and manual PIREPs are available. Live simulator telemetry requires a compatible connector.</p>
-<button class="secondary full" data-go="flightcenter">Open Flight Center</button>
-</div>
-<div class="card">
-<h3>Recent Flights</h3>
-<div id="recentFlights" class="empty">Loading flight records...</div>
-<button class="secondary full" data-go="history">View Flight History</button>
-</div>
-</div>
-</section>
+          <label for="loginPassword">Password</label>
+          <input id="loginPassword" type="password"
+                 autocomplete="current-password" required>
 
-<section class="page" id="page-flightcenter">
-<div class="card">
-<div class="eyebrow">FLIGHT OPERATIONS</div>
-<h2 style="margin-top:10px">Flight Center</h2>
-<p class="muted small">Choose a manual flight report or prepare a flight for a future simulator connection.</p>
-<label for="flightMode">Flight Mode</label>
-<select id="flightMode">
-<option value="manual">Manual PIREP</option>
-<option value="automatic">Automatic PIREP — Simulator Connector Required</option>
-</select>
-<div id="automaticNotice" class="card hidden" style="margin-top:15px">
-<span class="badge warn">Connector not installed</span>
-<p class="muted small">Enter your route and aircraft to prepare a flight. This web page cannot directly read arbitrary simulator ports or local IP addresses. A compatible connector is required for actual telemetry.</p>
-</div>
-<form id="flightForm">
-<div class="form-grid">
-<div><label for="origin">Origin ICAO</label><input id="origin" required maxlength="4" pattern="[A-Za-z]{4}" placeholder="e.g. LIMC"></div>
-<div><label for="destination">Destination ICAO</label><input id="destination" required maxlength="4" pattern="[A-Za-z]{4}" placeholder="e.g. EGLL"></div>
-<div><label for="aircraft">Aircraft</label><select id="aircraft" required><option value="">Select aircraft</option><option>Airbus A319</option><option>Airbus A320</option><option>Airbus A321</option><option>Airbus A330</option><option>Airbus A350</option><option>Boeing 737</option><option>Boeing 747</option><option>Boeing 777</option><option>Boeing 787</option><option>Other Aerofly Aircraft</option></select></div>
-<div><label for="flightDistance">Distance (NM)</label><input id="flightDistance" type="number" min="1" max="20000" step="1" placeholder="Optional"></div>
-</div>
-<div id="manualFields">
-<hr><h3>Manual Flight Report</h3>
-<div class="form-grid">
-<div><label for="flightStart">Departure Date and Time</label><input id="flightStart" type="datetime-local"></div>
-<div><label for="flightEnd">Arrival Date and Time</label><input id="flightEnd" type="datetime-local"></div>
-</div>
-<p class="muted small">Enter actual flight details. Do not submit estimated values as verified simulator telemetry.</p>
-</div>
-<div class="actions"><button class="primary" type="submit" id="saveFlight">Submit Manual PIREP</button></div>
-</form>
-<p id="flightMessage" class="message" aria-live="polite"></p>
-</div>
-<div class="card"><h3>Active and Planned Flights</h3><div id="activeFlights" class="empty">Loading flights...</div></div>
-</section>
+          <div class="actions">
+            <button id="loginButton" type="submit">Login</button>
+          </div>
+        </form>
 
-<section class="page" id="page-livemap">
-<div class="card">
-<div class="eyebrow">NETWORK OPERATIONS</div><h2 style="margin-top:10px">Live Map</h2>
-<p class="muted small">Shared pilot positions will appear here when the telemetry service is connected.</p>
-<div class="map-placeholder"><div class="map-icon">✈</div><h3>Live Tracking Not Connected</h3><p class="muted small">Satellite and hybrid map layers, live positions and shared aircraft tracking are not yet configured.</p></div>
-<p class="muted small">A compatible simulator connector and authenticated telemetry endpoint are required.</p>
-</div>
-</section>
+        <div id="loginMessage" class="message" role="status"></div>
+      </div>
 
-<section class="page" id="page-reports">
-<div class="card"><div class="eyebrow">FLIGHT DOCUMENTATION</div><h2 style="margin-top:10px">PIREP Center</h2><p class="muted small">Review your saved flights and their current status.</p><div id="reportList" class="empty">Loading reports...</div></div>
-</section>
+      <div class="panel">
+        <h2>Pilot Registration</h2>
+        <p class="muted">Create your EuroSky Airways pilot account.</p>
 
-<section class="page" id="page-history">
-<div class="card"><h2>Flight History</h2><p class="muted small">Your flight records, durations and recorded distances.</p><div id="historyList" class="empty">Loading flight history...</div></div>
-</section>
+        <form id="registerForm">
+          <label for="registerName">Full name</label>
+          <input id="registerName" type="text" autocomplete="name"
+                 required maxlength="100" placeholder="Your full name">
 
-<section class="page" id="page-profile">
-<div class="grid">
-<div class="card"><h2>Pilot Profile</h2><p class="muted small">Your account information.</p><label>Pilot Number</label><input id="profileNumber" readonly><label>Full Name</label><input id="profileName" readonly><label>Callsign</label><input id="profileCallsign" readonly><label>Email Address</label><input id="profileEmail" readonly><p id="profileMessage" class="message"></p></div>
-<div class="card"><h3>Account Security</h3><p class="muted small">Your account is authenticated through Supabase. Never share your password or secret API keys.</p><button class="danger full" id="profileSignOut">Sign Out</button></div>
-</div>
-</section>
+          <label for="registerCallsign">Pilot callsign</label>
+          <input id="registerCallsign" type="text" required
+                 maxlength="40" placeholder="e.g. AngeloRomani">
 
-<section class="page" id="page-statistics">
-<h2>Pilot Statistics</h2><p class="muted small">Statistics calculated from your own saved flight records.</p>
-<div class="stats">
-<div class="card"><div class="metric-label">Completed Flights</div><div class="metric" id="statFlights">0</div></div>
-<div class="card"><div class="metric-label">Total Hours</div><div class="metric" id="statHours">0.0</div></div>
-<div class="card"><div class="metric-label">Distance (NM)</div><div class="metric" id="statMiles">0</div></div>
-<div class="card"><div class="metric-label">Planned Flights</div><div class="metric" id="statPlanned">0</div></div>
-</div>
-<div class="card"><h3>Statistics Notes</h3><p class="muted small">These figures are personal statistics, not company-wide totals.</p></div>
-</section>
-</main>
-<footer>EuroSky Airways · Pilot Portal · Smart ACARS</footer>
-</div>
-</div>
+          <label for="registerEmail">Email address</label>
+          <input id="registerEmail" type="email" autocomplete="email"
+                 required placeholder="pilot@example.com">
 
-<script src="./config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-(() => {
-"use strict";
-const $ = id => document.getElementById(id);
-const cfg = window.EUROSKY_CONFIG;
-let client=null,sessionUser=null,profile=null,registerMode=false,flights=[],busy=false;
+          <label for="registerPassword">Password</label>
+          <input id="registerPassword" type="password"
+                 autocomplete="new-password" minlength="6" required
+                 placeholder="At least 6 characters">
 
-const titles={dashboard:"Pilot Dashboard",flightcenter:"Flight Center",livemap:"Live Map",reports:"PIREP Center",history:"Flight History",profile:"Pilot Profile",statistics:"Pilot Statistics"};
+          <div class="actions">
+            <button id="registerButton" type="submit">Register</button>
+          </div>
+        </form>
 
-function message(id,text,type=""){
- const el=$(id);if(!el)return;
- el.textContent=text;el.className="message"+(type?" "+type:"");
-}
-function esc(v){
- return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-}
-function setBusy(v){
- busy=v;$("authSubmit").disabled=v;
- $("authSubmit").textContent=v?"Please wait...":(registerMode?"Create Account":"Sign In");
-}
-function showSignedOut(){
- sessionUser=null;profile=null;flights=[];
- $("app").classList.add("hidden");
- $("authScreen").classList.remove("hidden");
-}
-function showSignedIn(){
- $("authScreen").classList.add("hidden");
- $("app").classList.remove("hidden");
-}
-function setAuthMode(register){
- registerMode=register;
- $("authTitle").textContent=register?"Create Your Pilot Account":"Pilot Sign In";
- $("authDescription").textContent=register?"Register to join EuroSky Airways.":"Sign in to access your pilot portal.";
- $("registerFields").classList.toggle("hidden",!register);
- $("fullName").required=register;$("callsign").required=register;
- $("password").autocomplete=register?"new-password":"current-password";
- setBusy(false);
- $("authMode").textContent=register?"Back to Sign In":"Create Account";
- message("authMessage","");
-}
-function openPage(name){
- document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
- const target=$("page-"+name);if(target)target.classList.add("active");
- document.querySelectorAll(".nav-button[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===name));
- $("pageTitle").textContent=titles[name]||"Pilot Portal";
- document.body.classList.remove("menu-open");
- if(["history","reports","flightcenter"].includes(name))renderFlights();
-}
-document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>openPage(b.dataset.page)));
-document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>openPage(b.dataset.go)));
-$("menuToggle").addEventListener("click",()=>document.body.classList.toggle("menu-open"));
-$("authMode").addEventListener("click",()=>setAuthMode(!registerMode));
+        <div id="registerMessage" class="message" role="status"></div>
+      </div>
+    </section>
 
-async function loadProfile(){
- const {data,error}=await client.from("pilot_profiles")
- .select("id,pilot_number,full_name,callsign,created_at")
- .eq("id",sessionUser.id).maybeSingle();
- if(error)throw error;
- if(!data)throw new Error("Your pilot profile was not found. Please contact the administrator.");
- profile=data;
- $("welcomeName").textContent=profile.callsign||profile.full_name||"Pilot";
- $("sidebarPilot").textContent="Pilot #"+profile.pilot_number;
- $("metricPilot").textContent=profile.pilot_number??"—";
- $("profileNumber").value=profile.pilot_number??"";
- $("profileName").value=profile.full_name||"";
- $("profileCallsign").value=profile.callsign||"";
- $("profileEmail").value=sessionUser.email||"";
- message("profileMessage","Profile loaded.","ok");
-}
-async function loadFlights(){
- const {data,error}=await client.from("flights")
- .select("id,pilot_id,origin_icao,destination_icao,aircraft,status,started_at,ended_at,duration_minutes,distance_nm,created_at")
- .eq("pilot_id",sessionUser.id).order("created_at",{ascending:false}).limit(200);
- if(error)throw error;
- flights=data||[];renderFlights();updateStats();
-}
-function fmtDate(value){
- if(!value)return "—";
- const d=new Date(value);
- return Number.isNaN(d.getTime())?"—":d.toLocaleString();
-}
-function flightTable(list){
- if(!list.length)return '<div class="empty">No flight records yet. Plan your first flight in Flight Center.</div>';
- return '<div class="table-wrap"><table><thead><tr><th>Route</th><th>Aircraft</th><th>Status</th><th>Duration</th><th>Distance</th><th>Created</th><th>Action</th></tr></thead><tbody>'+
- list.map(f=>'<tr><td>'+esc(f.origin_icao)+' → '+esc(f.destination_icao)+'</td><td>'+esc(f.aircraft)+'</td><td><span class="badge '+(f.status==="completed"?"good":"warn")+'">'+esc(f.status)+'</span></td><td>'+((Number(f.duration_minutes)||0)/60).toFixed(1)+' h</td><td>'+esc(f.distance_nm??"—")+' NM</td><td>'+esc(fmtDate(f.created_at))+'</td><td>'+(f.status!=="completed"?'<button class="secondary" data-finish="'+esc(f.id)+'">Finish Flight</button>':'<span class="muted">Saved</span>')+'</td></tr>').join("")+
- '</tbody></table></div>';
-}
-function renderFlights(){
- $("recentFlights").innerHTML=flightTable(flights.slice(0,5));
- $("activeFlights").innerHTML=flightTable(flights.filter(f=>f.status!=="completed"));
- $("reportList").innerHTML=flightTable(flights);
- $("historyList").innerHTML=flightTable(flights);
-}
-function updateStats(){
- const completed=flights.filter(f=>f.status==="completed");
- const minutes=completed.reduce((s,f)=>s+(Number(f.duration_minutes)||0),0);
- const miles=completed.reduce((s,f)=>s+(Number(f.distance_nm)||0),0);
- const planned=flights.filter(f=>f.status!=="completed").length;
- $("metricFlights").textContent=completed.length;
- $("metricHours").textContent=(minutes/60).toFixed(1);
- $("metricMiles").textContent=Math.round(miles).toLocaleString();
- $("statFlights").textContent=completed.length;
- $("statHours").textContent=(minutes/60).toFixed(1);
- $("statMiles").textContent=Math.round(miles).toLocaleString();
- $("statPlanned").textContent=planned;
-}
-asyn
+    <section id="dashboardSection" class="hidden">
+      <div class="panel">
+        <div class="section-title">
+          <div>
+            <h2>Pilot Dashboard</h2>
+            <p class="muted">Welcome to EuroSky Airways operations.</p>
+          </div>
+          <button id="logoutButton" class="danger" type="button">
+            Sign Out
+          </button>
+        </div>
+
+        <div id="dashboardMessage" class="message" role="status"></div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">PILOT NUMBER</div>
+            <div id="pilotNumber" class="stat-value">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">CALLSIGN</div>
+            <div id="pilotCallsign" class="stat-value">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">TOTAL FLIGHTS</div>
+            <div id="totalFlights" class="stat-value">0</div>
+          </div>
+        </div>
+
+        <p class="muted">
+          Account email: <span id="pilotEmail">—</span>
+        </p>
+      </div>
+
+      <div class="grid" style="margin-top:18px">
+        <div class="panel">
+          <h2>Manual PIREP</h2>
+          <p class="muted">Submit a completed or planned flight report.</p>
+
+          <form id="flightForm">
+            <label for="origin">Departure ICAO</label>
+            <input id="origin" type="text" required maxlength="4"
+                   pattern="[A-Za-z]{4}" placeholder="LIRF">
+
+            <label for="destination">Destination ICAO</label>
+            <input id="destination" type="text" required maxlength="4"
+                   pattern="[A-Za-z]{4}" placeholder="EGLL">
+
+            <label for="aircraft">Aircraft</label>
+            <input id="aircraft" type="text" required maxlength="80"
+                   placeholder="Boeing 737-800">
+
+            <label for="flightStatus">Flight status</label>
+            <select id="flightStatus" required>
+              <option value="planned">Planned</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+
+            <label for="duration">Flight duration (minutes)</label>
+            <input id="duration" type="number" min="1" max="2000"
+                   placeholder="120">
+
+            <label for="distance">Distance (nautical miles)</label>
+            <input id="distance" type="number" min="1" max="20000"
+                   placeholder="850">
+
+            <div class="actions">
+              <button id="flightButton" type="submit">Submit PIREP</button>
+            </div>
+          </form>
+
+          <div id="flightMessage" class="message" role="status"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Automatic PIREP</h2>
+          <p class="muted">
+            Automatic simulator telemetry is not connected in this version.
+          </p>
+          <div class="stat">
+            <div class="stat-label">ACARS CONNECTION</div>
+            <div class="stat-value">Not connected</div>
+          </div>
+          <p class="muted">
+            A compatible simulator connector and a secure telemetry service
+            are required to transmit live flight data.
+          </p>
+
+          <h2 style="margin-top:24px">Live Map</h2>
+          <div class="stat">
+            <div class="stat-label">LIVE POSITION</div>
+            <div class="stat-value">Unavailable</div>
+          </div>
+          <p class="muted">
+            Live aircraft positions will appear here after a telemetry
+            service has been configured.
+          </p>
+        </div>
+
+        <div class="panel wide">
+          <div class="section-title">
+            <h2>My Flight History</h2>
+            <button id="refreshButton" type="button" class="secondary">
+              Refresh
+            </button>
+          </div>
+
+          <div id="historyMessage" class="message" role="status"></div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Route</th>
+                  <th>Aircraft</th>
+                  <th>Status</th>
+                  <th>Duration</th>
+                  <th>Distance</th>
+                </tr>
+              </thead>
+              <tbody id="flightHistory">
+                <tr>
+                  <td colspan="6">Sign in to load your flight history.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    EuroSky Airways Smart ACARS · Virtual Airline Operations
+  </footer>
+
+  <!-- Keep config.js in the same GitHub Pages folder as index.html. -->
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const $ = (id) => document.getElementById(id);
+
+      let client = null;
+      let currentUser = null;
+      let currentProfile = null;
+
+      function showMessage(id, message, type = "info") {
+        const el = $(id);
+        el.textContent = message;
+        el.className = "message " + type;
+      }
+
+      function clearMessage(id) {
+        const el = $(id);
+        el.textContent = "";
+        el.className = "message";
+      }
+
+      function setBusy(buttonId, busy, label) {
+        const button = $(buttonId);
+        button.disabled = busy;
+
+        if (busy) {
+          button.dataset.originalLabel = button.textContent;
+          button.textContent = label;
+        } else {
+          button.textContent =
+            button.dataset.originalLabel || button.textContent;
+        }
+      }
+
+      function friendlyError(error) {
+        const message = error?.message || "An unexpected error occurred.";
+
+        if (/invalid login credentials/i.test(message)) {
+          return "Incorrect email or password.";
+        }
+
+        if (/email not confirmed/i.test(message)) {
+          return "Please confirm your email address before signing in.";
+        }
+
+        if (/already registered|already been registered/i.test(message)) {
+          return "This email is already registered. Please sign in instead.";
+        }
+
+        if (/row-level security|permission denied/i.test(message)) {
+          return "Database permission denied. Please check the Supabase RLS policies.";
+        }
+
+        return message;
+      }
+
+      function validateConfig() {
+        const config = window.EUROSKY_CONFIG;
+
+        if (!config ||
+            !config.SUPABASE_URL ||
+            !config.SUPABASE_PUBLISHABLE_KEY) {
+          throw new Error(
+            "Supabase configuration is missing. Check config.js."
+          );
+        }
+
+        if (!window.supabase || !window.supabase.createClient) {
+          throw new Error(
+            "Supabase library could not load. Check your internet connection."
+          );
+        }
+
+        client = window.supabase.createClient(
+          config.SUPABASE_URL,
+          config.SUPABASE_PUBLISHABLE_KEY
+        );
+      }
+
+      function showAuth() {
+        $("authSection").classList.remove("hidden");
+        $("dashboardSection").classList.add("hidden");
+      }
+
+      function showDashboard() {
+        $("authSection").classList.add("hidden");
+        $("dashboardSection").classList.remove("hidden");
+      }
+
+      async function loadProfile(user) {
+        const { data, error } = await client
+          .from("pilot_profiles")
+          .select("*")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        if (data) {
+          currentProfile = data;
+          return data;
+        }
+
+        const metadata = user.user_metadata || {};
+
+        const newProfile = {
+          id: user.id,
+          full_name: metadata.full_name || "",
+          callsign: metadata.callsign || ""
+        };
+
+        const { data: inserted, error: insertError } = await client
+          .from("pilot_profiles")
+          .upsert(newProfile, { onConflict: "id" })
+          .select()
+          .single();
+
+        if (insertError) {
+          throw new Error(
+            "Your pilot profile could not be loaded or created: " +
+            insertError.message
+          );
+        }
+
+        currentProfile = inserted;
+        return inserted;
+      }
+
+      async function loadFlightHistory() {
+        if (!currentUser) return;
+
+        showMessage("historyMessage", "Loading flight history…");
+
+        const { data, error } = await client
+          .from("flights")
+          .select("*")
+          .eq("pilot_id", currentUser.id)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          showMessage(
+            "historyMessage",
+            "Could not load flights: " + friendlyError(error),
+            "error"
+          );
+          return;
+        }
+
+        const flights = data || [];
+        $("totalFlights").textContent = String(flights.length);
+
+        const tbody = $("flightHistory");
+        tbody.replaceChildren();
+
+        if (flights.length === 0) {
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+          td.colSpan = 6;
+          td.textContent = "No flights have been submitted yet.";
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+        } else {
+          for (const flight of flights) {
+            const tr = document.createElement("tr");
+            const values = [
+              flight.created_at
+                ? new Date(flight.created_at).toLocaleDateString()
+                : "—",
+              (flight.origin_icao || "—") +
+                " → " + (flight.destination_icao || "—"),
+              flight.aircraft || "—",
+              flight.status || "—",
+              flight.duration_minutes != null
+                ? flight.duration_minutes + " min"
+                : "—",
+              flight.distance_nm != null
+                ? flight.distance_nm + " NM"
+                : "—"
+            ];
+
+            for (const value of values) {
+              const td = document.createElement("td");
+              td.textContent = String(value);
+              tr.appendChild(td);
+            }
+
+            tbody.appendChild(tr);
+          }
+        }
+
+        clearMessage("historyMessage");
+      }
+
+      async function openDashboard(user) {
+        currentUser = user;
+        showDashboard();
+
+        $("pilotEmail").textContent = user.email || "—";
+        showMessage("dashboardMessage", "Loading pilot profile…");
+
+        try {
+          const profile = await loadProfile(user);
+
+          $("pilotNumber").textContent =
+            profile.pilot_number != null
+              ? String(profile.pilot_number)
+              : "Pending";
+
+          $("pilotCallsign").textContent =
+            profile.callsign ||
+            user.user_metadata?.callsign ||
+            "Not set";
+
+          if (!profile.callsign && user.user_metadata?.callsign) {
+            showMessage(
+              "dashboardMessage",
+              "Your profile is missing a callsign. Update the callsign in your pilot profile database if needed.",
+              "info"
+            );
+          } else {
+            clearMessage("dashboardMessage");
+          }
+
+          await loadFlightHistory();
+        } catch (error) {
+          showMessage(
+            "dashboardMessage",
+            friendlyError(error),
+            "error"
+          );
+        }
+      }
+
+      $("loginForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        clearMessage("loginMessage");
+        setBusy("loginButton", true, "Signing in…");
+
+        try {
+          if (!client) validateConfig();
+
+          const email = $("loginEmail").value.trim();
+          const password = $("loginPassword").value;
+
+          const { data, error } = await client.auth.signInWithPassword({
+            email: email,
+            password: password
+          });
+
+          if (error) throw error;
+
+          if (data.user) {
+            await openDashboard(data.user);
+          }
+        } catch (error) {
+          showMessage(
+            "loginMessage",
+            friendlyError(error),
+            "error"
+          );
+        } finally {
+          setBusy("loginButton", false);
+        }
+      });
+
+      $("registerForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        clearMessage("registerMessage");
+        setBusy("registerButton", true, "Creating account…");
+
+        try {
+          if (!client) validateConfig();
+
+          const fullName = $("registerName").value.trim();
+          const callsign = $("registerCallsign").value.trim();
+          const email = $("registerEmail").value.trim();
+          const password = $("registerPassword").value;
+
+          if (!fullName || !callsign || !email || !password) {
+            throw new Error("Please complete all registration fields.");
+          }
+
+          // Corrected Supabase signUp syntax.
+          const { data, error } = await client.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+              data: {
+                full_name: fullName,
+                callsign: callsign
+              }
+            }
+          });
+
+          if (error) throw error;
+
+          if (data.session && data.user) {
+            await openDashboard(data.user);
+          } else {
+            showMessage(
+              "registerMessage",
+              "Registration received. Check your email to confirm your account, then sign in.",
+              "success"
+            );
+          }
+        } catch (error) {
+          showMessage(
+            "registerMessage",
+            friendlyError(error),
+            "error"
+          );
+        } finally {
+          setBusy("registerButton", false);
+        }
+      });
+
+      $("logoutButton").addEventListener("click", async () => {
+        try {
+          const { error } = await client.auth.signOut();
+          if (error) throw error;
+
+          currentUser = null;
+          currentProfile = null;
+          showAuth();
+          showMessage("loginMessage", "You have signed out.", "success");
+        } catch (error) {
+          showMessage(
+            "dashboardMessage",
+            friendlyError(error),
+            "error"
+          );
+        }
+      });
+
+      $("flightForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        clearMessage("flightMessage");
+        setBusy("flightButton", true, "Submitting…");
+
+        try {
+          if (!client || !currentUser) {
+            throw new Error("Please sign in before submitting a flight.");
+          }
+
+          const origin = $("origin").value.trim().toUpperCase();
+          const destination =
+            $("destination").value.trim().toUpperCase();
+          const aircraft = $("aircraft").value.trim();
+          const status = $("flightStatus").value;
+          const durationValue = $("duration").value;
+          const distanceValue = $("distance").value;
+
+          if (!/^[A-Z]{4}$/.test(origin) ||
+              !/^[A-Z]{4}$/.test(destination)) {
+            throw new Error(
+              "Departure and destination must be valid four-letter ICAO codes."
+            );
+          }
+
+          if (origin === destination) {
+            throw new Error(
+              "Departure and destination airports must be different."
+            );
+          }
+
+          const payload = {
+            pilot_id: currentUser.id,
+            origin_icao: origin,
+            destination_icao: destination,
+            aircraft: aircraft,
+            status: status
+          };
+
+          if (durationValue !== "") {
+            payload.duration_minutes = Number(durationValue);
+          }
+
+          if (distanceValue !== "") {
+            payload.distance_nm = Number(distanceValue);
+          }
+
+          const { error } = await client
+            .from("flights")
+            .insert(payload);
+
+          if (error) throw error;
+
+          $("flightForm").reset();
+
+          showMessage(
+            "flightMessage",
+            "Flight report submitted successfully.",
+            "success"
+          );
+
+          await loadFlightHistory();
+        } catch (error) {
+          showMessage(
+            "flightMessage",
+            friendlyError(error),
+            "error"
+          );
+        } finally {
+          setBusy("flightButton", false);
+        }
+      });
+
+      $("refreshButton").addEventListener("click", loadFlightHistory);
+
+      async function initialize() {
+        try {
+          validateConfig();
+
+          const { data, error } = await client.auth.getSession();
+          if (error) throw error;
+
+          if (data.session?.user) {
+            await openDashboard(data.session.user);
+          } else {
+            showAuth();
+          }
+
+          client.auth.onAuthStateChange((event, session) => {
+            if (event === "SIGNED_OUT") {
+              currentUser = null;
+              currentProfile = null;
+              showAuth();
+            }
+          });
+        } catch (error) {
+          showAuth();
+          showMessage(
+            "loginMessage",
+            friendlyError(error),
+            "error"
+          );
+          showMessage(
+            "registerMessage",
+            friendlyError(error),
+            "error"
+          );
+        }
+      }
+
+      initialize();
+    })();
+  </script>
+</body>
+</html>
