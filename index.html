@@ -2,1229 +2,845 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#071426">
-  <title>EuroSky Airways | Smart ACARS</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#071426">
+<title>EuroSky Airways | Smart ACARS</title>
 
-  <style>
-    :root {
-      --bg: #071426;
-      --panel: #101f35;
-      --panel2: #152943;
-      --border: #29415e;
-      --text: #eef5ff;
-      --muted: #9db0c9;
-      --blue: #4da3ff;
-      --green: #45d6a0;
-      --red: #ff7373;
-    }
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(145deg, #071426, #0c1c32);
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    header {
-      padding: 22px 18px;
-      border-bottom: 1px solid var(--border);
-      background: #09172a;
-    }
-
-    .header-inner {
-      max-width: 1100px;
-      margin: auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .brand {
-      font-size: 21px;
-      font-weight: 800;
-      letter-spacing: 1px;
-    }
-
-    .brand span { color: var(--blue); }
-
-    .subtitle {
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 5px;
-      letter-spacing: 2px;
-    }
-
-    .badge {
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 8px 12px;
-      color: var(--green);
-      font-size: 12px;
-    }
-
-    main {
-      max-width: 1100px;
-      margin: auto;
-      padding: 24px 16px 50px;
-    }
-
-    .hero { margin-bottom: 24px; }
-
-    h1 {
-      font-size: clamp(26px, 5vw, 38px);
-      margin: 0 0 10px;
-    }
-
-    h2 {
-      margin-top: 0;
-      font-size: 20px;
-    }
-
-    p { line-height: 1.55; }
-
-    .muted { color: var(--muted); }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 18px;
-    }
-
-    .panel {
-      background: rgba(16, 31, 53, .96);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 22px;
-      min-width: 0;
-    }
-
-    .wide { grid-column: 1 / -1; }
-
-    label {
-      display: block;
-      color: #cbd9eb;
-      font-size: 13px;
-      margin: 14px 0 7px;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 12px;
-      border-radius: 9px;
-      border: 1px solid var(--border);
-      background: #09172a;
-      color: var(--text);
-      font-size: 15px;
-      min-height: 44px;
-    }
-
-    input:focus, select:focus {
-      outline: 2px solid var(--blue);
-      outline-offset: 1px;
-    }
-
-    button {
-      border: 0;
-      border-radius: 9px;
-      padding: 12px 16px;
-      background: var(--blue);
-      color: #061326;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      min-height: 44px;
-    }
-
-    button:disabled {
-      opacity: .6;
-      cursor: wait;
-    }
-
-    button.secondary {
-      background: var(--panel2);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    button.danger {
-      background: #542c39;
-      color: #fff;
-      border: 1px solid #824455;
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 18px;
-    }
-
-    .actions button { flex: 1; }
-
-    .message {
-      display: none;
-      margin-top: 15px;
-      padding: 12px;
-      border-radius: 9px;
-      overflow-wrap: anywhere;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .message.success {
-      display: block;
-      background: #103a32;
-      border: 1px solid #277b68;
-      color: #b7ffe8;
-    }
-
-    .message.error {
-      display: block;
-      background: #421f2b;
-      border: 1px solid #854052;
-      color: #ffd3dc;
-    }
-
-    .message.info {
-      display: block;
-      background: #142d4a;
-      border: 1px solid #315b84;
-      color: #d3e9ff;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 18px;
-    }
-
-    .stat {
-      background: #0a192c;
-      border: 1px solid var(--border);
-      padding: 15px;
-      border-radius: 12px;
-      overflow-wrap: anywhere;
-    }
-
-    .stat-label {
-      color: var(--muted);
-      font-size: 12px;
-      margin-bottom: 8px;
-    }
-
-    .stat-value {
-      font-size: 20px;
-      font-weight: 800;
-    }
-
-    .section-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .table-wrap { overflow-x: auto; }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-      font-size: 13px;
-    }
-
-    th, td {
-      padding: 12px 10px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-      white-space: nowrap;
-    }
-
-    th { color: var(--muted); }
-
-    .hidden { display: none !important; }
-
-    footer {
-      border-top: 1px solid var(--border);
-      color: var(--muted);
-      text-align: center;
-      padding: 22px 15px;
-      font-size: 12px;
-    }
-
-    @media (max-width: 700px) {
-      .grid { grid-template-columns: 1fr; }
-      .wide { grid-column: auto; }
-      .stats { grid-template-columns: 1fr; }
-      .panel { padding: 17px; }
-      .brand { font-size: 18px; }
-    }
-  </style>
+<style>
+:root {
+  --bg:#071426; --panel:#101f35; --panel2:#152943;
+  --border:#29415e; --text:#eef5ff; --muted:#9db0c9;
+  --blue:#4da3ff; --green:#45d6a0; --red:#ff7373;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; font-family:Arial,Helvetica,sans-serif;
+  background:linear-gradient(145deg,#071426,#0c1c32);
+  color:var(--text); min-height:100vh;
+}
+header { padding:20px 16px; border-bottom:1px solid var(--border); background:#09172a; }
+.header-inner {
+  max-width:1200px; margin:auto; display:flex;
+  justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
+}
+.brand { font-size:21px; font-weight:800; letter-spacing:1px; }
+.brand span { color:var(--blue); }
+.subtitle { color:var(--muted); font-size:12px; margin-top:5px; letter-spacing:2px; }
+.badge { border:1px solid var(--border); border-radius:20px; padding:8px 12px; color:var(--green); font-size:12px; }
+main { max-width:1200px; margin:auto; padding:24px 16px 50px; }
+h1 { font-size:clamp(26px,5vw,38px); margin:0 0 10px; }
+h2 { margin-top:0; font-size:20px; }
+p { line-height:1.5; }
+.muted { color:var(--muted); }
+.grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+.panel { background:rgba(16,31,53,.96); border:1px solid var(--border); border-radius:16px; padding:20px; min-width:0; margin-bottom:18px; }
+.wide { grid-column:1/-1; }
+label { display:block; color:#cbd9eb; font-size:13px; margin:14px 0 7px; }
+input,select,textarea {
+  width:100%; padding:12px; border-radius:9px; border:1px solid var(--border);
+  background:#09172a; color:var(--text); font-size:15px; min-height:44px;
+}
+input:focus,select:focus,textarea:focus { outline:2px solid var(--blue); outline-offset:1px; }
+button {
+  border:0; border-radius:9px; padding:12px 16px; background:var(--blue);
+  color:#061326; font-size:14px; font-weight:700; cursor:pointer; min-height:44px;
+}
+button:disabled { opacity:.6; cursor:wait; }
+button.secondary { background:var(--panel2); color:var(--text); border:1px solid var(--border); }
+button.danger { background:#542c39; color:#fff; border:1px solid #824455; }
+button.success { background:#17634e; color:white; }
+.actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+.actions button { flex:1; }
+.message { display:none; margin-top:14px; padding:12px; border-radius:9px; overflow-wrap:anywhere; font-size:14px; line-height:1.5; }
+.message.success { display:block; background:#103a32; border:1px solid #277b68; color:#b7ffe8; }
+.message.error { display:block; background:#421f2b; border:1px solid #854052; color:#ffd3dc; }
+.message.info { display:block; background:#142d4a; border:1px solid #315b84; color:#d3e9ff; }
+.stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-top:18px; }
+.stat { background:#0a192c; border:1px solid var(--border); padding:15px; border-radius:12px; overflow-wrap:anywhere; }
+.stat-label { color:var(--muted); font-size:12px; margin-bottom:8px; }
+.stat-value { font-size:20px; font-weight:800; }
+.section-title { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; margin-top:15px; font-size:13px; }
+th,td { padding:11px 9px; text-align:left; border-bottom:1px solid var(--border); }
+th { color:var(--muted); white-space:nowrap; }
+td { overflow-wrap:anywhere; }
+td button { margin:3px; padding:8px 10px; min-height:36px; }
+.hidden { display:none!important; }
+.tabs { display:flex; flex-wrap:wrap; gap:8px; margin:15px 0; }
+.tabs button { flex:1; min-width:120px; }
+#routeMap { height:430px; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#0a192c; }
+.map-legend { color:var(--muted); font-size:12px; margin-top:8px; }
+.status { display:inline-block; padding:4px 8px; border-radius:20px; font-size:11px; font-weight:bold; background:#243b55; }
+.status.approved { background:#14503e; color:#a7ffe0; }
+.status.pending { background:#57431a; color:#ffe5a0; }
+.status.rejected { background:#542c39; color:#ffd3dc; }
+footer { border-top:1px solid var(--border); color:var(--muted); text-align:center; padding:22px 15px; font-size:12px; }
+@media(max-width:750px) {
+  .grid { grid-template-columns:1fr; }
+  .wide { grid-column:auto; }
+  .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .panel { padding:16px; }
+  .brand { font-size:18px; }
+  #routeMap { height:350px; }
+}
+</style>
 </head>
 
 <body>
-  <header>
-    <div class="header-inner">
-      <div>
-        <div class="brand">EURO<span>SKY</span> AIRWAYS</div>
-        <div class="subtitle">SMART ACARS · VIRTUAL AIRLINE</div>
-      </div>
-      <div class="badge">● PILOT OPERATIONS</div>
+<header>
+  <div class="header-inner">
+    <div>
+      <div class="brand">EURO<span>SKY</span> AIRWAYS</div>
+      <div class="subtitle">SMART ACARS · VIRTUAL AIRLINE</div>
     </div>
-  </header>
+    <div class="badge">● PILOT OPERATIONS</div>
+  </div>
+</header>
 
-  <main>
-    <section class="hero">
-      <h1>Smart ACARS Portal</h1>
-      <p class="muted">
-        Pilot account, flight reporting and flight history.
-        Sign in to access your pilot dashboard.
-      </p>
-    </section>
+<main>
+  <section>
+    <h1>Smart ACARS Portal</h1>
+    <p class="muted">Pilot accounts, flight reporting, operations and flight history.</p>
+  </section>
 
-    <!-- LOGIN AND REGISTRATION -->
-    <section id="authSection" class="grid">
-      <div class="panel">
-        <h2>Pilot Login</h2>
-        <p class="muted">Sign in to your EuroSky Airways account.</p>
+  <section id="authSection" class="grid">
+    <div class="panel">
+      <h2>Pilot Login</h2>
+      <form id="loginForm">
+        <label for="loginEmail">Email address</label>
+        <input id="loginEmail" type="email" autocomplete="email" required placeholder="pilot@example.com">
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" required>
+        <div class="actions"><button id="loginButton" type="submit">Login</button></div>
+      </form>
+      <button id="forgotButton" class="secondary" type="button" style="width:100%;margin-top:10px">Forgot password?</button>
+      <div id="loginMessage" class="message" role="status"></div>
+    </div>
 
-        <form id="loginForm">
-          <label for="loginEmail">Email address</label>
-          <input id="loginEmail" type="email" autocomplete="email"
-                 required placeholder="pilot@example.com">
+    <div class="panel">
+      <h2>Pilot Registration</h2>
+      <form id="registerForm">
+        <label for="registerName">Full name</label>
+        <input id="registerName" required maxlength="100" autocomplete="name">
+        <label for="registerCallsign">Pilot callsign</label>
+        <input id="registerCallsign" required maxlength="40" placeholder="e.g. AngeloRomani">
+        <label for="registerEmail">Email address</label>
+        <input id="registerEmail" type="email" autocomplete="email" required>
+        <label for="registerPassword">Password</label>
+        <input id="registerPassword" type="password" autocomplete="new-password" minlength="6" required>
+        <div class="actions"><button id="registerButton" type="submit">Register</button></div>
+      </form>
+      <div id="registerMessage" class="message" role="status"></div>
+    </div>
+  </section>
 
-          <label for="loginPassword">Password</label>
-          <input id="loginPassword" type="password"
-                 autocomplete="current-password" required>
-
-          <div class="actions">
-            <button id="loginButton" type="submit">Login</button>
-          </div>
-        </form>
-
-        <div id="loginMessage" class="message" role="status"></div>
+  <section id="dashboardSection" class="hidden">
+    <div class="panel">
+      <div class="section-title">
+        <div><h2>Pilot Dashboard</h2><p class="muted">Welcome to EuroSky Airways operations.</p></div>
+        <button id="logoutButton" class="danger" type="button">Sign Out</button>
       </div>
-
-      <div class="panel">
-        <h2>Pilot Registration</h2>
-        <p class="muted">Create your EuroSky Airways pilot account.</p>
-
-        <form id="registerForm">
-          <label for="registerName">Full name</label>
-          <input id="registerName" type="text" autocomplete="name"
-                 required maxlength="100" placeholder="Your full name">
-
-          <label for="registerCallsign">Pilot callsign</label>
-          <input id="registerCallsign" type="text" required
-                 maxlength="40" placeholder="e.g. AngeloRomani">
-
-          <label for="registerEmail">Email address</label>
-          <input id="registerEmail" type="email" autocomplete="email"
-                 required placeholder="pilot@example.com">
-
-          <label for="registerPassword">Password</label>
-          <input id="registerPassword" type="password"
-                 autocomplete="new-password" minlength="6" required
-                 placeholder="At least 6 characters">
-
-          <div class="actions">
-            <button id="registerButton" type="submit">Register</button>
-          </div>
-        </form>
-
-        <div id="registerMessage" class="message" role="status"></div>
+      <div id="dashboardMessage" class="message" role="status"></div>
+      <div class="stats">
+        <div class="stat"><div class="stat-label">PILOT NUMBER</div><div id="pilotNumber" class="stat-value">—</div></div>
+        <div class="stat"><div class="stat-label">CALLSIGN</div><div id="pilotCallsign" class="stat-value">—</div></div>
+        <div class="stat"><div class="stat-label">APPROVED HOURS</div><div id="approvedHours" class="stat-value">0.0</div></div>
+        <div class="stat"><div class="stat-label">PILOT RANK</div><div id="pilotRank" class="stat-value">Student Pilot</div></div>
       </div>
-    </section>
+      <p class="muted">Account email: <span id="pilotEmail">—</span></p>
+    </div>
 
-    <!-- PILOT DASHBOARD -->
-    <section id="dashboardSection" class="hidden">
+    <div class="grid">
       <div class="panel">
-        <div class="section-title">
-          <div>
-            <h2>Pilot Dashboard</h2>
-            <p class="muted">Welcome to EuroSky Airways operations.</p>
-          </div>
-          <button id="logoutButton" class="danger" type="button">
-            Sign Out
-          </button>
-        </div>
-
-        <div id="dashboardMessage" class="message" role="status"></div>
-
-        <div class="stats">
-          <div class="stat">
-            <div class="stat-label">PILOT NUMBER</div>
-            <div id="pilotNumber" class="stat-value">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">CALLSIGN</div>
-            <div id="pilotCallsign" class="stat-value">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">TOTAL FLIGHTS</div>
-            <div id="totalFlights" class="stat-value">0</div>
-          </div>
-        </div>
-
-        <p class="muted">
-          Account email: <span id="pilotEmail">—</span>
-        </p>
-      </div>
-
-      <div class="grid" style="margin-top:18px">
-
-        <!-- MANUAL PIREP -->
-        <div class="panel">
-          <h2>Manual PIREP</h2>
-          <p class="muted">Submit a flight report manually.</p>
-
-          <form id="flightForm">
-            <label for="origin">Departure ICAO</label>
-            <input id="origin" type="text" required maxlength="4"
-                   pattern="[A-Za-z]{4}" placeholder="LIRF">
-
-            <label for="destination">Destination ICAO</label>
-            <input id="destination" type="text" required maxlength="4"
-                   pattern="[A-Za-z]{4}" placeholder="LIMC">
-
-            <label for="aircraft">Aircraft</label>
-            <input id="aircraft" type="text" required maxlength="80"
-                   placeholder="Boeing 737-800">
-
-            <label for="flightStatus">Flight status</label>
-            <select id="flightStatus" required>
-              <option value="planned">Planned</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-
-            <label for="duration">Flight duration (minutes)</label>
-            <input id="duration" type="number" min="1" max="2000"
-                   placeholder="120">
-
-            <label for="distance">Distance (nautical miles)</label>
-            <input id="distance" type="number" min="1" max="20000"
-                   placeholder="850">
-
-            <div class="actions">
-              <button id="flightButton" type="submit">Submit PIREP</button>
-            </div>
-          </form>
-
-          <div id="flightMessage" class="message" role="status"></div>
-        </div>
-
-        <!-- AUTOMATIC PIREP -->
-        <div class="panel">
-          <h2>Automatic PIREP</h2>
-
-          <div class="message info" role="status">
-            <strong>Bridge not connected</strong><br>
-            Live telemetry from Aerofly FS Global on Android is not
-            available yet. A compatible telemetry bridge must be
-            developed and connected before real simulator data can
-            be received.
-          </div>
-
+        <h2>Manual PIREP</h2>
+        <p class="muted">Submit your flight report for administrator review.</p>
+        <form id="flightForm">
+          <label for="origin">Departure ICAO</label>
+          <input id="origin" required maxlength="4" pattern="[A-Za-z]{4}" placeholder="LIRF">
+          <label for="destination">Destination ICAO</label>
+          <input id="destination" required maxlength="4" pattern="[A-Za-z]{4}" placeholder="LIMC">
+          <label for="aircraft">Aircraft</label>
+          <input id="aircraft" required maxlength="80" placeholder="Boeing 737-800">
+          <label for="duration">Flight duration (minutes)</label>
+          <input id="duration" type="number" min="1" max="2000" required placeholder="120">
+          <label for="distance">Distance (nautical miles)</label>
+          <input id="distance" type="number" min="1" max="20000" required placeholder="350">
           <div class="stat" style="margin-top:16px">
-            <div class="stat-label">TELEMETRY STATUS</div>
-            <div class="stat-value" id="acarsStatus">Not connected</div>
-            <p class="muted" id="acarsStatusDetail">
-              Waiting for a compatible telemetry bridge.
-            </p>
+            <div class="stat-label">REPORT STATUS</div>
+            <div class="stat-value">Pending review</div>
+            <p class="muted">An administrator must approve your report.</p>
           </div>
+          <div class="actions"><button id="flightButton" type="submit">Submit PIREP</button></div>
+        </form>
+        <div id="flightMessage" class="message" role="status"></div>
+      </div>
 
-          <div class="actions">
-            <button type="button" id="demoPreviewButton"
-                    class="secondary">
-              Load Test Preview
-            </button>
-          </div>
+      <div class="panel">
+        <h2>Automatic PIREP</h2>
+        <div class="message info" style="display:block">
+          <strong>Telemetry bridge not connected.</strong><br>
+          Live telemetry from Aerofly FS Global on Android is not available.
+          Test examples cannot be saved as real flights.
+        </div>
+        <div class="stat" style="margin-top:16px">
+          <div class="stat-label">TELEMETRY STATUS</div>
+          <div class="stat-value">Not connected</div>
+          <p class="muted">Waiting for a compatible telemetry bridge.</p>
+        </div>
+        <div class="actions"><button id="demoPreviewButton" class="secondary" type="button">Load Test Preview</button></div>
+        <div id="demoMessage" class="message" role="status"></div>
+        <h2 style="margin-top:24px">Approved Flight Routes</h2>
+        <div id="routeMap"></div>
+        <div class="map-legend">Satellite imagery · Blue neon lines show approved routes only.</div>
+        <div id="mapMessage" class="message" role="status"></div>
+      </div>
 
-          <p class="muted">
-            Test preview only: these are example values, not data
-            received from Aerofly. They must not be submitted as a
-            real flight.
-          </p>
+      <div class="panel wide">
+        <div class="section-title">
+          <h2>My Flight History</h2>
+          <button id="refreshButton" class="secondary" type="button">Refresh</button>
+        </div>
+        <div id="historyMessage" class="message" role="status"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Route</th><th>Aircraft</th><th>Status</th><th>Duration</th><th>Distance</th></tr></thead>
+            <tbody id="flightHistory"><tr><td colspan="6">Sign in to load your flight history.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-          <form id="automaticPirepForm" class="hidden">
-            <h2>Review Flight Report</h2>
-
-            <p class="muted">
-              Review and correct the details before proceeding.
-              Nothing is saved until you confirm.
-            </p>
-
-            <label for="autoOrigin">Departure ICAO</label>
-            <input id="autoOrigin" type="text" maxlength="4"
-                   pattern="[A-Za-z]{4}" required>
-
-            <label for="autoDestination">Destination ICAO</label>
-            <input id="autoDestination" type="text" maxlength="4"
-                   pattern="[A-Za-z]{4}" required>
-
-            <label for="autoAircraft">Aircraft</label>
-            <input id="autoAircraft" type="text" maxlength="80"
-                   required>
-
-            <label for="autoStatus">Flight status</label>
-            <select id="autoStatus" required>
-              <option value="completed">Completed</option>
-              <option value="planned">Planned</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-
-            <label for="autoDuration">Duration (minutes)</label>
-            <input id="autoDuration" type="number"
-                   min="1" max="2000">
-
-            <label for="autoDistance">Distance (nautical miles)</label>
-            <input id="autoDistance" type="number"
-                   min="1" max="20000">
-
-            <div class="message info">
-              The current example cannot be saved as a real PIREP.
-              Real simulator telemetry is not connected yet.
-            </div>
-
-            <div class="actions">
-              <button type="submit" id="confirmAutomaticPirepButton">
-                Confirm and Save PIREP
-              </button>
-
-              <button type="button" id="cancelAutomaticPirepButton"
-                      class="secondary">
-                Cancel
-              </button>
-            </div>
-          </form>
-
-          <div id="automaticPirepMessage"
-               class="message" role="status"></div>
-
-          <!-- LIVE MAP -->
-          <h2 style="margin-top:24px">Live Map</h2>
-
-          <div class="stat">
-            <div class="stat-label">LIVE POSITION</div>
-            <div class="stat-value">Unavailable</div>
-          </div>
-
-          <p class="muted">
-            Live aircraft tracking will be available after the
-            telemetry bridge has been implemented and connected.
-          </p>
+    <section id="adminSection" class="hidden">
+      <div class="panel">
+        <div class="section-title"><div><h2>Administration Panel</h2><p class="muted">Manage pilots, review reports and configure ranks.</p></div><span class="badge">ADMIN ACCESS</span></div>
+        <div id="adminMessage" class="message" role="status"></div>
+        <div class="tabs">
+          <button class="secondary" data-admin-tab="flights" type="button">PIREP Review</button>
+          <button class="secondary" data-admin-tab="pilots" type="button">Pilot Management</button>
+          <button class="secondary" data-admin-tab="ranks" type="button">Rank Settings</button>
         </div>
 
-        <!-- FLIGHT HISTORY -->
-        <div class="panel wide">
-          <div class="section-title">
-            <h2>My Flight History</h2>
-            <button id="refreshButton" type="button"
-                    class="secondary">Refresh</button>
-          </div>
-
-          <div id="historyMessage" class="message" role="status"></div>
-
+        <div id="adminFlightsTab">
+          <h2>Flight Reports</h2>
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Route</th>
-                  <th>Aircraft</th>
-                  <th>Status</th>
-                  <th>Duration</th>
-                  <th>Distance</th>
-                </tr>
-              </thead>
-              <tbody id="flightHistory">
-                <tr>
-                  <td colspan="6">
-                    Sign in to load your flight history.
-                  </td>
-                </tr>
-              </tbody>
+              <thead><tr><th>Date</th><th>Pilot</th><th>Route</th><th>Aircraft</th><th>Duration</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="adminFlights"><tr><td colspan="7">Loading reports…</td></tr></tbody>
             </table>
           </div>
         </div>
+
+        <div id="adminPilotsTab" class="hidden">
+          <h2>Pilot Management</h2>
+          <p class="muted">Edit names, callsigns and ranks. Password recovery is sent by email.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Email</th><th>Pilot No.</th><th>Full name</th><th>Callsign</th><th>Rank</th><th>Approved hours</th><th>Actions</th></tr></thead>
+              <tbody id="adminPilots"><tr><td colspan="7">Loading pilots…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="adminRanksTab" class="hidden">
+          <h2>Rank Thresholds</h2>
+          <p class="muted">Thresholds are used to display suggested rank from approved flight hours. An administrator can also assign ranks manually.</p>
+          <form id="rankForm">
+            <label for="rankName">Rank name</label><input id="rankName" required maxlength="60" placeholder="First Officer">
+            <label for="rankHours">Required approved hours</label><input id="rankHours" type="number" required min="0" max="100000" step="0.5">
+            <label for="rankOrder">Display order</label><input id="rankOrder" type="number" required min="0" max="1000" step="1">
+            <div class="actions"><button type="submit">Save Rank</button></div>
+          </form>
+          <div class="table-wrap">
+            <table><thead><tr><th>Rank</th><th>Required Hours</th><th>Order</th></tr></thead><tbody id="adminRanks"><tr><td colspan="3">Loading ranks…</td></tr></tbody></table>
+          </div>
+        </div>
       </div>
     </section>
-  </main>
+  </section>
+</main>
 
-  <footer>
-    EuroSky Airways Smart ACARS · Virtual Airline Operations
-  </footer>
+<footer>EuroSky Airways Smart ACARS · Virtual Airline Operations</footer>
 
-  <script src="./config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <script>
-    (() => {
-      "use strict";
+<script>
+(() => {
+  "use strict";
 
-      const $ = (id) => document.getElementById(id);
+  const $ = id => document.getElementById(id);
+  let client = null;
+  let currentUser = null;
+  let currentProfile = null;
+  let isAdmin = false;
+  let map = null;
+  let routeLayer = null;
+  let airportIndex = null;
+  let profilesById = {};
+  let approvedHoursByPilot = {};
 
-      let client = null;
-      let currentUser = null;
-      let currentProfile = null;
+  function msg(id, text, type = "info") {
+    const el = $(id);
+    el.textContent = text;
+    el.className = "message " + type;
+  }
+  function clearMsg(id) {
+    $(id).textContent = "";
+    $(id).className = "message";
+  }
+  function busy(id, value, label) {
+    const b = $(id);
+    if (!b) return;
+    if (value) {
+      if (!b.dataset.originalLabel) b.dataset.originalLabel = b.textContent;
+      b.disabled = true;
+      b.textContent = label;
+    } else {
+      b.disabled = false;
+      b.textContent = b.dataset.originalLabel || b.textContent;
+    }
+  }
+  function friendly(error) {
+    const m = error?.message || "An unexpected error occurred.";
+    if (/invalid login credentials/i.test(m)) return "Incorrect email or password.";
+    if (/email not confirmed/i.test(m)) return "Please confirm your email address before signing in.";
+    if (/row-level security|permission denied/i.test(m)) return "Database permission denied. Please check Supabase RLS policies.";
+    return m;
+  }
+  function validateConfig() {
+    const c = window.EUROSKY_CONFIG;
+    if (!c?.SUPABASE_URL || !c?.SUPABASE_PUBLISHABLE_KEY) {
+      throw new Error("Supabase configuration is missing. Check config.js.");
+    }
+    if (!window.supabase?.createClient) throw new Error("Supabase library did not load.");
+    if (!client) client = window.supabase.createClient(c.SUPABASE_URL, c.SUPABASE_PUBLISHABLE_KEY);
+  }
+  function showAuth() {
+    $("authSection").classList.remove("hidden");
+    $("dashboardSection").classList.add("hidden");
+  }
+  function showDashboard() {
+    $("authSection").classList.add("hidden");
+    $("dashboardSection").classList.remove("hidden");
+  }
+  function cell(tr, value) {
+    const td = document.createElement("td");
+    td.textContent = value == null ? "—" : String(value);
+    tr.appendChild(td);
+    return td;
+  }
+  function statusCell(tr, status) {
+    const td = document.createElement("td");
+    const span = document.createElement("span");
+    span.className = "status " + String(status || "").toLowerCase();
+    span.textContent = status || "unknown";
+    td.appendChild(span);
+    tr.appendChild(td);
+    return td;
+  }
+  function makeButton(label, className, action) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = label;
+    b.className = className || "secondary";
+    b.addEventListener("click", action);
+    return b;
+  }
 
-      // Test previews are never treated as real simulator telemetry.
-      let automaticPreviewIsDemo = false;
+  async function loadProfile(user) {
+    const { data, error } = await client.from("pilot_profiles")
+      .select("*").eq("id", user.id).maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error("Pilot profile not found. Please contact an administrator.");
+    currentProfile = data;
+    return data;
+  }
 
-      function showMessage(id, message, type = "info") {
-        const el = $(id);
-        el.textContent = message;
-        el.className = "message " + type;
+  async function checkAdmin(user) {
+    const { data, error } = await client.from("admin_users")
+      .select("user_id").eq("user_id", user.id).maybeSingle();
+    if (error) {
+      isAdmin = false;
+      return false;
+    }
+    isAdmin = !!data;
+    $("adminSection").classList.toggle("hidden", !isAdmin);
+    return isAdmin;
+  }
+
+  async function getApprovedHours() {
+    const { data, error } = await client.from("flights")
+      .select("pilot_id,duration_minutes,status");
+    if (error) throw error;
+    const totals = {};
+    for (const f of (data || [])) {
+      if (f.status === "approved" && f.duration_minutes != null) {
+        totals[f.pilot_id] = (totals[f.pilot_id] || 0) + Number(f.duration_minutes);
       }
+    }
+    approvedHoursByPilot = totals;
+    return totals;
+  }
 
-      function clearMessage(id) {
-        const el = $(id);
-        el.textContent = "";
-        el.className = "message";
+  function hoursFor(id) {
+    return (approvedHoursByPilot[id] || 0) / 60;
+  }
+
+  async function loadRanks() {
+    const { data, error } = await client.from("pilot_ranks")
+      .select("*").order("required_hours", { ascending: true });
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function suggestedRank(hours) {
+    const ranks = await loadRanks();
+    let result = ranks[0]?.rank_name || "Student Pilot";
+    for (const r of ranks) if (hours >= Number(r.required_hours)) result = r.rank_name;
+    return result;
+  }
+
+  async function openDashboard(user) {
+    currentUser = user;
+    showDashboard();
+    $("pilotEmail").textContent = user.email || "—";
+    msg("dashboardMessage", "Loading pilot profile…");
+    try {
+      const p = await loadProfile(user);
+      await checkAdmin(user);
+      await getApprovedHours();
+      $("pilotNumber").textContent = p.pilot_number ?? "Pending";
+      $("pilotCallsign").textContent = p.callsign || "Not set";
+      $("pilotRank").textContent = p.rank || "Student Pilot";
+      $("approvedHours").textContent = hoursFor(user.id).toFixed(1);
+      clearMsg("dashboardMessage");
+      await loadHistory();
+      await initMap();
+      await loadRoutes();
+      if (isAdmin) {
+        await loadAdminFlights();
+        await loadAdminPilots();
+        await loadAdminRanks();
       }
+    } catch (e) {
+      msg("dashboardMessage", friendly(e), "error");
+    }
+  }
 
-      function setBusy(buttonId, busy, label) {
-        const button = $(buttonId);
-        button.disabled = busy;
-
-        if (busy) {
-          if (!button.dataset.originalLabel) {
-            button.dataset.originalLabel = button.textContent;
-          }
-          button.textContent = label;
-        } else {
-          button.textContent =
-            button.dataset.originalLabel || button.textContent;
-        }
+  async function loadHistory() {
+    if (!currentUser) return;
+    msg("historyMessage", "Loading flight history…");
+    const { data, error } = await client.from("flights")
+      .select("*").eq("pilot_id", currentUser.id).order("created_at", { ascending: false });
+    if (error) {
+      msg("historyMessage", "Could not load flights: " + friendly(error), "error");
+      return;
+    }
+    const tbody = $("flightHistory");
+    tbody.replaceChildren();
+    const flights = data || [];
+    $("totalFlights") && ($("totalFlights").textContent = String(flights.length));
+    if (!flights.length) {
+      const tr = document.createElement("tr"); cell(tr, "No flights submitted yet.").colSpan = 6; tbody.appendChild(tr);
+    } else {
+      for (const f of flights) {
+        const tr = document.createElement("tr");
+        cell(tr, f.created_at ? new Date(f.created_at).toLocaleDateString() : "—");
+        cell(tr, `${f.origin_icao || "—"} → ${f.destination_icao || "—"}`);
+        cell(tr, f.aircraft);
+        statusCell(tr, f.status);
+        cell(tr, f.duration_minutes == null ? "—" : `${f.duration_minutes} min`);
+        cell(tr, f.distance_nm == null ? "—" : `${f.distance_nm} NM`);
+        tbody.appendChild(tr);
       }
+    }
+    clearMsg("historyMessage");
+  }
 
-      function friendlyError(error) {
-        const message =
-          error?.message || "An unexpected error occurred.";
-
-        if (/invalid login credentials/i.test(message)) {
-          return "Incorrect email or password.";
-        }
-
-        if (/email not confirmed/i.test(message)) {
-          return "Please confirm your email address before signing in.";
-        }
-
-        if (/already registered|already been registered/i.test(message)) {
-          return "This email is already registered. Please sign in instead.";
-        }
-
-        if (/row-level security|permission denied/i.test(message)) {
-          return "Database permission denied. Please check Supabase RLS policies.";
-        }
-
-        return message;
-      }
-
-      function validateConfig() {
-        const config = window.EUROSKY_CONFIG;
-
-        if (!config ||
-            !config.SUPABASE_URL ||
-            !config.SUPABASE_PUBLISHABLE_KEY) {
-          throw new Error(
-            "Supabase configuration is missing. Check config.js."
-          );
-        }
-
-        if (!window.supabase ||
-            !window.supabase.createClient) {
-          throw new Error(
-            "Supabase library could not load. Check your internet connection."
-          );
-        }
-
-        if (!client) {
-          client = window.supabase.createClient(
-            config.SUPABASE_URL,
-            config.SUPABASE_PUBLISHABLE_KEY
-          );
-        }
-      }
-
-      function showAuth() {
-        $("authSection").classList.remove("hidden");
-        $("dashboardSection").classList.add("hidden");
-      }
-
-      function showDashboard() {
-        $("authSection").classList.add("hidden");
-        $("dashboardSection").classList.remove("hidden");
-      }
-
-      async function loadProfile(user) {
-        const { data, error } = await client
-          .from("pilot_profiles")
-          .select("*")
-          .eq("id", user.id)
-          .maybeSingle();
-
-        if (error) throw error;
-
-        if (data) {
-          currentProfile = data;
-          return data;
-        }
-
-        const metadata = user.user_metadata || {};
-
-        const newProfile = {
-          id: user.id,
-          full_name: metadata.full_name || "",
-          callsign: metadata.callsign || ""
-        };
-
-        const { data: inserted, error: insertError } = await client
-          .from("pilot_profiles")
-          .upsert(newProfile, { onConflict: "id" })
-          .select()
-          .single();
-
-        if (insertError) {
-          throw new Error(
-            "Your pilot profile could not be loaded or created: " +
-            insertError.message
-          );
-        }
-
-        currentProfile = inserted;
-        return inserted;
-      }
-
-      async function loadFlightHistory() {
-        if (!currentUser) return;
-
-        showMessage("historyMessage", "Loading flight history…");
-
-        const { data, error } = await client
-          .from("flights")
-          .select("*")
-          .eq("pilot_id", currentUser.id)
-          .order("created_at", { ascending: false });
-
-        if (error) {
-          showMessage(
-            "historyMessage",
-            "Could not load flights: " + friendlyError(error),
-            "error"
-          );
-          return;
-        }
-
-        const flights = data || [];
-        $("totalFlights").textContent = String(flights.length);
-
-        const tbody = $("flightHistory");
-        tbody.replaceChildren();
-
-        if (flights.length === 0) {
-          const tr = document.createElement("tr");
-          const td = document.createElement("td");
-          td.colSpan = 6;
-          td.textContent = "No flights have been submitted yet.";
-          tr.appendChild(td);
-          tbody.appendChild(tr);
-        } else {
-          for (const flight of flights) {
-            const tr = document.createElement("tr");
-
-            const values = [
-              flight.created_at
-                ? new Date(flight.created_at).toLocaleDateString()
-                : "—",
-              (flight.origin_icao || "—") +
-                " → " + (flight.destination_icao || "—"),
-              flight.aircraft || "—",
-              flight.status || "—",
-              flight.duration_minutes != null
-                ? flight.duration_minutes + " min"
-                : "—",
-              flight.distance_nm != null
-                ? flight.distance_nm + " NM"
-                : "—"
-            ];
-
-            for (const value of values) {
-              const td = document.createElement("td");
-              td.textContent = String(value);
-              tr.appendChild(td);
-            }
-
-            tbody.appendChild(tr);
-          }
-        }
-
-        clearMessage("historyMessage");
-      }
-
-      async function openDashboard(user) {
-        currentUser = user;
-        showDashboard();
-
-        $("pilotEmail").textContent = user.email || "—";
-        showMessage("dashboardMessage", "Loading pilot profile…");
-
-        try {
-          const profile = await loadProfile(user);
-
-          $("pilotNumber").textContent =
-            profile.pilot_number != null
-              ? String(profile.pilot_number)
-              : "Pending";
-
-          $("pilotCallsign").textContent =
-            profile.callsign ||
-            user.user_metadata?.callsign ||
-            "Not set";
-
-          if (!profile.callsign && user.user_metadata?.callsign) {
-            showMessage(
-              "dashboardMessage",
-              "Your profile is missing a callsign. Update your pilot profile in Supabase if needed.",
-              "info"
-            );
-          } else {
-            clearMessage("dashboardMessage");
-          }
-
-          await loadFlightHistory();
-        } catch (error) {
-          showMessage(
-            "dashboardMessage",
-            friendlyError(error),
-            "error"
-          );
-        }
-      }
-
-      // LOGIN
-      $("loginForm").addEventListener("submit", async (event) => {
-        event.preventDefault();
-        clearMessage("loginMessage");
-        setBusy("loginButton", true, "Signing in…");
-
-        try {
-          validateConfig();
-
-          const email = $("loginEmail").value.trim();
-          const password = $("loginPassword").value;
-
-          const { data, error } = await client.auth.signInWithPassword({
-            email: email,
-            password: password
-          });
-
-          if (error) throw error;
-
-          if (data.user) {
-            await openDashboard(data.user);
-          }
-        } catch (error) {
-          showMessage(
-            "loginMessage",
-            friendlyError(error),
-            "error"
-          );
-        } finally {
-          setBusy("loginButton", false);
-        }
+  $("loginForm").addEventListener("submit", async e => {
+    e.preventDefault(); clearMsg("loginMessage"); busy("loginButton", true, "Signing in…");
+    try {
+      validateConfig();
+      const { data, error } = await client.auth.signInWithPassword({
+        email: $("loginEmail").value.trim(), password: $("loginPassword").value
       });
+      if (error) throw error;
+      if (data.user) await openDashboard(data.user);
+    } catch (err) { msg("loginMessage", friendly(err), "error"); }
+    finally { busy("loginButton", false); }
+  });
 
-      // REGISTRATION
-      $("registerForm").addEventListener("submit", async (event) => {
-        event.preventDefault();
-        clearMessage("registerMessage");
-        setBusy("registerButton", true, "Creating account…");
-
-        try {
-          validateConfig();
-
-          const fullName = $("registerName").value.trim();
-          const callsign = $("registerCallsign").value.trim();
-          const email = $("registerEmail").value.trim();
-          const password = $("registerPassword").value;
-
-          if (!fullName || !callsign || !email || !password) {
-            throw new Error("Please complete all registration fields.");
-          }
-
-          const { data, error } = await client.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-              data: {
-                full_name: fullName,
-                callsign: callsign
-              }
-            }
-          });
-
-          if (error) throw error;
-
-          if (data.session && data.user) {
-            await openDashboard(data.user);
-          } else {
-            showMessage(
-              "registerMessage",
-              "Registration received. Check your email to confirm your account, then sign in.",
-              "success"
-            );
-          }
-        } catch (error) {
-          showMessage(
-            "registerMessage",
-            friendlyError(error),
-            "error"
-          );
-        } finally {
-          setBusy("registerButton", false);
-        }
+  $("registerForm").addEventListener("submit", async e => {
+    e.preventDefault(); clearMsg("registerMessage"); busy("registerButton", true, "Creating account…");
+    try {
+      validateConfig();
+      const fullName = $("registerName").value.trim();
+      const callsign = $("registerCallsign").value.trim();
+      const email = $("registerEmail").value.trim();
+      const password = $("registerPassword").value;
+      const { data, error } = await client.auth.signUp({
+        email, password, options: { data: { full_name: fullName, callsign } }
       });
+      if (error) throw error;
+      if (data.session && data.user) await openDashboard(data.user);
+      else msg("registerMessage", "Registration received. Check your email to confirm your account, then sign in.", "success");
+    } catch (err) { msg("registerMessage", friendly(err), "error"); }
+    finally { busy("registerButton", false); }
+  });
 
-      // LOGOUT
-      $("logoutButton").addEventListener("click", async () => {
-        try {
-          const { error } = await client.auth.signOut();
-          if (error) throw error;
+  $("forgotButton").addEventListener("click", async () => {
+    try {
+      validateConfig();
+      const email = $("loginEmail").value.trim();
+      if (!email) {
+        msg("loginMessage", "Enter your email address in the login field first.", "error");
+        return;
+      }
+      const redirectTo = window.location.origin + window.location.pathname;
+      const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo });
+      if (error) throw error;
+      msg("loginMessage", "If the account exists, a password recovery email has been requested. Check your inbox.", "success");
+    } catch (err) { msg("loginMessage", friendly(err), "error"); }
+  });
 
-          currentUser = null;
-          currentProfile = null;
+  $("logoutButton").addEventListener("click", async () => {
+    try {
+      const { error } = await client.auth.signOut();
+      if (error) throw error;
+      currentUser = null; currentProfile = null; isAdmin = false;
+      $("adminSection").classList.add("hidden");
+      showAuth();
+      msg("loginMessage", "You have signed out.", "success");
+    } catch (e) { msg("dashboardMessage", friendly(e), "error"); }
+  });
 
+  $("flightForm").addEventListener("submit", async e => {
+    e.preventDefault(); clearMsg("flightMessage"); busy("flightButton", true, "Submitting…");
+    try {
+      if (!client || !currentUser) throw new Error("Please sign in before submitting a flight.");
+      const origin = $("origin").value.trim().toUpperCase();
+      const destination = $("destination").value.trim().toUpperCase();
+      const aircraft = $("aircraft").value.trim();
+      const duration = Number($("duration").value);
+      const distance = Number($("distance").value);
+      if (!/^[A-Z]{4}$/.test(origin) || !/^[A-Z]{4}$/.test(destination)) throw new Error("Use valid four-letter ICAO codes.");
+      if (origin === destination) throw new Error("Departure and destination must be different.");
+      if (!aircraft) throw new Error("Enter the aircraft type.");
+      if (!Number.isInteger(duration) || duration < 1 || duration > 2000) throw new Error("Duration must be 1–2000 minutes.");
+      if (!Number.isFinite(distance) || distance < 1 || distance > 20000) throw new Error("Distance must be 1–20000 NM.");
+      const { error } = await client.from("flights").insert({
+        pilot_id: currentUser.id, origin_icao: origin, destination_icao: destination,
+        aircraft, duration_minutes: duration, distance_nm: distance, status: "pending"
+      });
+      if (error) throw error;
+      $("flightForm").reset();
+      msg("flightMessage", "PIREP submitted successfully. Status: Pending review.", "success");
+      await loadHistory();
+      if (isAdmin) await loadAdminFlights();
+    } catch (err) { msg("flightMessage", friendly(err), "error"); }
+    finally { busy("flightButton", false); }
+  });
+
+  $("demoPreviewButton").addEventListener("click", () => {
+    msg("demoMessage", "Example preview only. No Aerofly telemetry is connected, and test data cannot be saved as a real PIREP.", "info");
+  });
+
+  async function loadAdminFlights() {
+    if (!isAdmin) return;
+    const tbody = $("adminFlights");
+    tbody.replaceChildren();
+    const { data, error } = await client.from("flights").select("*").order("created_at", { ascending: false });
+    if (error) { msg("adminMessage", "Cannot load reports: " + friendly(error), "error"); return; }
+    const flights = data || [];
+    if (!flights.length) {
+      const tr = document.createElement("tr"); cell(tr, "No flight reports found.").colSpan = 7; tbody.appendChild(tr); return;
+    }
+    const ids = [...new Set(flights.map(f => f.pilot_id).filter(Boolean))];
+    const { data: profiles } = await client.from("pilot_profiles").select("id,full_name,callsign,pilot_number");
+    profilesById = {};
+    for (const p of (profiles || [])) profilesById[p.id] = p;
+    for (const f of flights) {
+      const tr = document.createElement("tr");
+      const p = profilesById[f.pilot_id] || {};
+      cell(tr, f.created_at ? new Date(f.created_at).toLocaleDateString() : "—");
+      cell(tr, `${p.pilot_number ?? "—"} · ${p.callsign || p.full_name || f.pilot_id || "—"}`);
+      cell(tr, `${f.origin_icao || "—"} → ${f.destination_icao || "—"}`);
+      cell(tr, f.aircraft);
+      cell(tr, f.duration_minutes == null ? "—" : `${f.duration_minutes} min`);
+      statusCell(tr, f.status);
+      const actions = document.createElement("td");
+      if (f.status === "pending") {
+        actions.append(
+          makeButton("Approve", "success", () => reviewFlight(f.id, "approved")),
+          makeButton("Reject", "danger", () => reviewFlight(f.id, "rejected"))
+        );
+      } else {
+        actions.append(makeButton("Set Pending", "secondary", () => reviewFlight(f.id, "pending")));
+      }
+      tr.appendChild(actions);
+      tbody.appendChild(tr);
+    }
+  }
+
+  async function reviewFlight(id, status) {
+    if (!isAdmin) return;
+    const confirmText = status === "approved" ? "Approve this PIREP?" : status === "rejected" ? "Reject this PIREP?" : "Return this PIREP to pending?";
+    if (!window.confirm(confirmText)) return;
+    try {
+      const { error } = await client.from("flights").update({
+        status, reviewed_at: new Date().toISOString(), reviewed_by: currentUser.id
+      }).eq("id", id);
+      if (error) throw error;
+      msg("adminMessage", `PIREP updated: ${status}.`, "success");
+      await getApprovedHours();
+      await loadAdminFlights();
+      await loadHistory();
+      await refreshPilotStats();
+      await loadRoutes();
+    } catch (e) { msg("adminMessage", friendly(e), "error"); }
+  }
+
+  async function refreshPilotStats() {
+    await loadProfile(currentUser);
+    $("approvedHours").textContent = hoursFor(currentUser.id).toFixed(1);
+    $("pilotRank").textContent = currentProfile.rank || "Student Pilot";
+  }
+
+  async function loadAdminPilots() {
+    if (!isAdmin) return;
+    const tbody = $("adminPilots"); tbody.replaceChildren();
+    const { data, error } = await client.from("pilot_profiles").select("*").order("pilot_number", { ascending: true });
+    if (error) { msg("adminMessage", "Cannot load pilots: " + friendly(error), "error"); return; }
+    await getApprovedHours();
+    for (const p of (data || [])) {
+      const tr = document.createElement("tr");
+      cell(tr, p.email || "Email unavailable");
+      cell(tr, p.pilot_number);
+      const nameTd = document.createElement("td");
+      const nameInput = document.createElement("input");
+      nameInput.value = p.full_name || ""; nameInput.maxLength = 100; nameInput.setAttribute("aria-label", "Full name");
+      nameTd.appendChild(nameInput); tr.appendChild(nameTd);
+      const callTd = document.createElement("td");
+      const callInput = document.createElement("input");
+      callInput.value = p.callsign || ""; callInput.maxLength = 40; callInput.setAttribute("aria-label", "Callsign");
+      callTd.appendChild(callInput); tr.appendChild(callTd);
+      const rankTd = document.createElement("td");
+      const rankSelect = document.createElement("select");
+      const { data: ranks } = await client.from("pilot_ranks").select("rank_name").order("display_order");
+      for (const r of (ranks || [])) {
+        const option = document.createElement("option");
+        option.value = r.rank_name; option.textContent = r.rank_name;
+        rankSelect.appendChild(option);
+      }
+      if (!(ranks || []).some(r => r.rank_name === p.rank)) {
+        const option = document.createElement("option"); option.value = p.rank || "Student Pilot"; option.textContent = p.rank || "Student Pilot"; rankSelect.appendChild(option);
+      }
+      rankSelect.value = p.rank || "Student Pilot";
+      rankTd.appendChild(rankSelect); tr.appendChild(rankTd);
+      cell(tr, (hoursFor(p.id)).toFixed(1));
+      const actionTd = document.createElement("td");
+      actionTd.append(
+        makeButton("Save", "success", async () => {
+          try {
+            const { error: updateError } = await client.from("pilot_profiles").update({
+              full_name: nameInput.value.trim(), callsign: callInput.value.trim(), rank: rankSelect.value
+            }).eq("id", p.id);
+            if (updateError) throw updateError;
+            msg("adminMessage", "Pilot profile updated.", "success");
+            if (p.id === currentUser.id) await refreshPilotStats();
+            await loadAdminPilots();
+            await loadAdminFlights();
+          } catch (e) { msg("adminMessage", friendly(e), "error"); }
+        }),
+        makeButton("Reset password", "secondary", async () => {
+          if (!p.email) { msg("adminMessage", "No email address is available for this pilot.", "error"); return; }
+          try {
+            const { error: resetError } = await client.auth.resetPasswordForEmail(p.email, {
+              redirectTo: window.location.origin + window.location.pathname
+            });
+            if (resetError) throw resetError;
+            msg("adminMessage", "Password recovery email requested for " + p.email + ".", "success");
+          } catch (e) { msg("adminMessage", friendly(e), "error"); }
+        })
+      );
+      tr.appendChild(actionTd); tbody.appendChild(tr);
+    }
+  }
+
+  async function loadAdminRanks() {
+    if (!isAdmin) return;
+    const tbody = $("adminRanks"); tbody.replaceChildren();
+    const { data, error } = await client.from("pilot_ranks").select("*").order("display_order");
+    if (error) { msg("adminMessage", friendly(error), "error"); return; }
+    for (const r of (data || [])) {
+      const tr = document.createElement("tr");
+      cell(tr, r.rank_name); cell(tr, r.required_hours); cell(tr, r.display_order);
+      tbody.appendChild(tr);
+    }
+  }
+
+  $("rankForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    if (!isAdmin) return;
+    const rank_name = $("rankName").value.trim();
+    const required_hours = Number($("rankHours").value);
+    const display_order = Number($("rankOrder").value);
+    try {
+      if (!rank_name || !Number.isFinite(required_hours) || required_hours < 0 || !Number.isInteger(display_order) || display_order < 0) {
+        throw new Error("Enter a valid rank name, hour threshold and display order.");
+      }
+      const { error } = await client.from("pilot_ranks").upsert({ rank_name, required_hours, display_order });
+      if (error) throw error;
+      $("rankForm").reset();
+      msg("adminMessage", "Rank saved. Existing pilot ranks are not automatically changed.", "success");
+      await loadAdminRanks();
+      await loadAdminPilots();
+    } catch (e2) { msg("adminMessage", friendly(e2), "error"); }
+  });
+
+  document.querySelectorAll("[data-admin-tab]").forEach(button => {
+    button.addEventListener("click", () => {
+      const tab = button.dataset.adminTab;
+      $("adminFlightsTab").classList.toggle("hidden", tab !== "flights");
+      $("adminPilotsTab").classList.toggle("hidden", tab !== "pilots");
+      $("adminRanksTab").classList.toggle("hidden", tab !== "ranks");
+    });
+  });
+
+  async function loadAirportIndex() {
+    if (airportIndex) return airportIndex;
+    msg("mapMessage", "Loading airport coordinates…", "info");
+    const urls = [
+      "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airports.csv"
+    ];
+    let response;
+    for (const url of urls) {
+      try { response = await fetch(url); if (response.ok) break; } catch (_) {}
+    }
+    if (!response?.ok) throw new Error("Airport coordinate dataset is unavailable.");
+    const csv = await response.text();
+    const lines = csv.split(/\r?\n/);
+    const headers = parseCsvLine(lines[0]);
+    const idx = {};
+    headers.forEach((h, i) => idx[h] = i);
+    const result = {};
+    for (let i = 1; i < lines.length; i++) {
+      if (!lines[i]) continue;
+      const row = parseCsvLine(lines[i]);
+      const icao = (row[idx.gps_code] || row[idx.ident] || "").toUpperCase();
+      const type = row[idx.type] || "";
+      const lat = Number(row[idx.latitude_deg]);
+      const lon = Number(row[idx.longitude_deg]);
+      if (icao.length === 4 && Number.isFinite(lat) && Number.isFinite(lon) &&
+          ["large_airport","medium_airport","small_airport"].includes(type) && !result[icao]) {
+        result[icao] = [lat, lon];
+      }
+    }
+    airportIndex = result;
+    clearMsg("mapMessage");
+    return result;
+  }
+
+  function parseCsvLine(line) {
+    const out = []; let value = ""; let quoted = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (quoted && line[i + 1] === '"') { value += '"'; i++; }
+        else quoted = !quoted;
+      } else if (ch === "," && !quoted) {
+        out.push(value); value = "";
+      } else value += ch;
+    }
+    out.push(value);
+    return out;
+  }
+
+  async function initMap() {
+    if (map || !window.L) return;
+    map = L.map("routeMap", { worldCopyJump: true }).setView([25, 5], 2);
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      attribution: "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics"
+    }).addTo(map);
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", {
+      attribution: "Labels © Esri", pane: "overlayPane", opacity: 0.9
+    }).addTo(map);
+    routeLayer = L.layerGroup().addTo(map);
+    setTimeout(() => map.invalidateSize(), 300);
+  }
+
+  async function loadRoutes() {
+    if (!map || !currentUser) return;
+    routeLayer.clearLayers();
+    try {
+      const { data, error } = await client.from("flights")
+        .select("origin_icao,destination_icao,status,pilot_id")
+        .eq("status", "approved");
+      if (error) throw error;
+      if (!(data || []).length) {
+        msg("mapMessage", "No approved routes yet. Approved flight routes will appear here.", "info");
+        return;
+      }
+      const airports = await loadAirportIndex();
+      let drawn = 0;
+      for (const f of (data || [])) {
+        const a = airports[(f.origin_icao || "").toUpperCase()];
+        const b = airports[(f.destination_icao || "").toUpperCase()];
+        if (!a || !b) continue;
+        L.polyline([a, b], { color: "#00aaff", weight: 3, opacity: 0.95, className: "eurosky-route" }).addTo(routeLayer);
+        L.circleMarker(a, { radius: 4, color: "#6de4ff", fillColor: "#007bff", fillOpacity: 1 }).addTo(routeLayer)
+          .bindTooltip(f.origin_icao);
+        L.circleMarker(b, { radius: 4, color: "#6de4ff", fillColor: "#007bff", fillOpacity: 1 }).addTo(routeLayer)
+          .bindTooltip(f.destination_icao);
+        drawn++;
+      }
+      if (!drawn) msg("mapMessage", "Approved PIREPs exist, but airport coordinates could not be resolved for their routes.", "info");
+      else clearMsg("mapMessage");
+    } catch (e) {
+      msg("mapMessage", "Map routes could not be loaded: " + friendly(e), "error");
+    }
+  }
+
+  $("refreshButton").addEventListener("click", async () => {
+    await loadHistory();
+    await getApprovedHours();
+    await refreshPilotStats();
+    await loadRoutes();
+    if (isAdmin) {
+      await loadAdminFlights();
+      await loadAdminPilots();
+      await loadAdminRanks();
+    }
+  });
+
+  async function initialize() {
+    try {
+      validateConfig();
+      const { data, error } = await client.auth.getSession();
+      if (error) throw error;
+      if (data.session?.user) await openDashboard(data.session.user);
+      else showAuth();
+      client.auth.onAuthStateChange((event, session) => {
+        if (event === "SIGNED_OUT") {
+          currentUser = null; currentProfile = null; isAdmin = false;
+          $("adminSection").classList.add("hidden");
           showAuth();
-          showMessage(
-            "loginMessage",
-            "You have signed out.",
-            "success"
-          );
-        } catch (error) {
-          showMessage(
-            "dashboardMessage",
-            friendlyError(error),
-            "error"
-          );
         }
       });
+    } catch (e) {
+      showAuth();
+      msg("loginMessage", friendly(e), "error");
+      msg("registerMessage", friendly(e), "error");
+    }
+  }
 
-      // MANUAL PIREP
-      $("flightForm").addEventListener("submit", async (event) => {
-        event.preventDefault();
-        clearMessage("flightMessage");
-        setBusy("flightButton", true, "Submitting…");
-
-        try {
-          if (!client || !currentUser) {
-            throw new Error("Please sign in before submitting a flight.");
-          }
-
-          const origin = $("origin").value.trim().toUpperCase();
-          const destination =
-            $("destination").value.trim().toUpperCase();
-          const aircraft = $("aircraft").value.trim();
-          const status = $("flightStatus").value;
-          const durationValue = $("duration").value;
-          const distanceValue = $("distance").value;
-
-          if (!/^[A-Z]{4}$/.test(origin) ||
-              !/^[A-Z]{4}$/.test(destination)) {
-            throw new Error(
-              "Departure and destination must be valid four-letter ICAO codes."
-            );
-          }
-
-          if (origin === destination) {
-            throw new Error(
-              "Departure and destination airports must be different."
-            );
-          }
-
-          const payload = {
-            pilot_id: currentUser.id,
-            origin_icao: origin,
-            destination_icao: destination,
-            aircraft: aircraft,
-            status: status
-          };
-
-          if (durationValue !== "") {
-            const duration = Number(durationValue);
-
-            if (!Number.isInteger(duration) ||
-                duration < 1 || duration > 2000) {
-              throw new Error(
-                "Duration must be between 1 and 2000 minutes."
-              );
-            }
-
-            payload.duration_minutes = duration;
-          }
-
-          if (distanceValue !== "") {
-            const distance = Number(distanceValue);
-
-            if (!Number.isFinite(distance) ||
-                distance < 1 || distance > 20000) {
-              throw new Error(
-                "Distance must be between 1 and 20000 NM."
-              );
-            }
-
-            payload.distance_nm = distance;
-          }
-
-          const { error } = await client
-            .from("flights")
-            .insert(payload);
-
-          if (error) throw error;
-
-          $("flightForm").reset();
-
-          showMessage(
-            "flightMessage",
-            "Flight report submitted successfully.",
-            "success"
-          );
-
-          await loadFlightHistory();
-        } catch (error) {
-          showMessage(
-            "flightMessage",
-            friendlyError(error),
-            "error"
-          );
-        } finally {
-          setBusy("flightButton", false);
-        }
-      });
-
-      // AUTOMATIC PIREP TEST PREVIEW
-      $("demoPreviewButton").addEventListener("click", () => {
-        $("autoOrigin").value = "LIRF";
-        $("autoDestination").value = "LIMC";
-        $("autoAircraft").value = "Boeing 737-800";
-        $("autoStatus").value = "completed";
-        $("autoDuration").value = "60";
-        $("autoDistance").value = "250";
-
-        automaticPreviewIsDemo = true;
-
-        $("automaticPirepForm").classList.remove("hidden");
-
-        $("acarsStatus").textContent = "Bridge not connected";
-        $("acarsStatusDetail").textContent =
-          "Example values only. No simulator telemetry has been received.";
-
-        showMessage(
-          "automaticPirepMessage",
-          "Test preview loaded. These are example values, not a real flight. Saving is disabled until real telemetry is connected.",
-          "info"
-        );
-      });
-
-      // CANCEL AUTOMATIC PIREP
-      $("cancelAutomaticPirepButton").addEventListener("click", () => {
-        $("automaticPirepForm").classList.add("hidden");
-        clearMessage("automaticPirepMessage");
-      });
-
-      // AUTOMATIC PIREP REVIEW AND SAVE
-      $("automaticPirepForm").addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        clearMessage("automaticPirepMessage");
-
-        if (!client || !currentUser) {
-          showMessage(
-            "automaticPirepMessage",
-            "Please sign in before submitting a PIREP.",
-            "error"
-          );
-          return;
-        }
-
-        // Important safety check: demo values are never saved.
-        if (automaticPreviewIsDemo) {
-          showMessage(
-            "automaticPirepMessage",
-            "Save blocked: these are test values, not data received from Aerofly. The telemetry bridge must be connected before automatic PIREPs can be submitted.",
-            "error"
-          );
-          return;
-        }
-
-        const origin = $("autoOrigin").value.trim().toUpperCase();
-        const destination =
-          $("autoDestination").value.trim().toUpperCase();
-        const aircraft = $("autoAircraft").value.trim();
-        const status = $("autoStatus").value;
-        const durationValue = $("autoDuration").value;
-        const distanceValue = $("autoDistance").value;
-
-        if (!/^[A-Z]{4}$/.test(origin) ||
-            !/^[A-Z]{4}$/.test(destination)) {
-          showMessage(
-            "automaticPirepMessage",
-            "Enter valid four-letter ICAO airport codes.",
-            "error"
-          );
-          return;
-        }
-
-        if (origin === destination) {
-          showMessage(
-            "automaticPirepMessage",
-            "Departure and destination must be different.",
-            "error"
-          );
-          return;
-        }
-
-        if (!aircraft) {
-          showMessage(
-            "automaticPirepMessage",
-            "Enter the aircraft type.",
-            "error"
-          );
-          return;
-        }
-
-        const payload = {
-          pilot_id: currentUser.id,
-          origin_icao: origin,
-          destination_icao: destination,
-          aircraft: aircraft,
-          status: status
-        };
-
-        if (durationValue !== "") {
-          const duration = Number(durationValue);
-
-          if (!Number.isInteger(duration) ||
-              duration < 1 || duration > 2000) {
-            showMessage(
-              "automaticPirepMessage",
-              "Duration must be between 1 and 2000 minutes.",
-              "error"
-            );
-            return;
-          }
-
-          payload.duration_minutes = duration;
-        }
-
-        if (distanceValue !== "") {
-          const distance = Number(distanceValue);
-
-          if (!Number.isFinite(distance) ||
-              distance < 1 || distance > 20000) {
-            showMessage(
-              "automaticPirepMessage",
-              "Distance must be between 1 and 20000 NM.",
-              "error"
-            );
-            return;
-          }
-
-          payload.distance_nm = distance;
-        }
-
-        const confirmed = window.confirm(
-          "Confirm this flight report and save it to Supabase?"
-        );
-
-        if (!confirmed) return;
-
-        setBusy(
-          "confirmAutomaticPirepButton",
-          true,
-          "Saving…"
-        );
-
-        try {
-          const { error } = await client
-            .from("flights")
-            .insert(payload);
-
-          if (error) throw error;
-
-          $("automaticPirepForm").classList.add("hidden");
-
-          showMessage(
-            "automaticPirepMessage",
-            "PIREP saved successfully.",
-            "success"
-          );
-
-          await loadFlightHistory();
-        } catch (error) {
-          showMessage(
-            "automaticPirepMessage",
-            friendlyError(error),
-            "error"
-          );
-        } finally {
-          setBusy("confirmAutomaticPirepButton", false);
-        }
-      });
-
-      // REFRESH FLIGHT HISTORY
-      $("refreshButton").addEventListener("click", loadFlightHistory);
-
-      // INITIALIZATION
-      async function initialize() {
-        try {
-          validateConfig();
-
-          const { data, error } = await client.auth.getSession();
-          if (error) throw error;
-
-          if (data.session?.user) {
-            await openDashboard(data.session.user);
-          } else {
-            showAuth();
-          }
-
-          client.auth.onAuthStateChange((event) => {
-            if (event === "SIGNED_OUT") {
-              currentUser = null;
-              currentProfile = null;
-              showAuth();
-            }
-          });
-        } catch (error) {
-          showAuth();
-
-          showMessage(
-            "loginMessage",
-            friendlyError(error),
-            "error"
-          );
-
-          showMessage(
-            "registerMessage",
-            friendlyError(error),
-            "error"
-          );
-        }
-      }
-
-      initialize();
-    })();
-  </script>
+  initialize();
+})();
+</script>
 </body>
 </html>
