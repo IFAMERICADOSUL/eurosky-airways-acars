@@ -82,7 +82,10 @@
       margin: 0 0 10px;
     }
 
-    h2 { margin-top: 0; font-size: 20px; }
+    h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
 
     p { line-height: 1.55; }
 
@@ -172,6 +175,7 @@
       border-radius: 9px;
       overflow-wrap: anywhere;
       font-size: 14px;
+      line-height: 1.5;
     }
 
     .message.success {
@@ -287,6 +291,7 @@
       </p>
     </section>
 
+    <!-- LOGIN AND REGISTRATION -->
     <section id="authSection" class="grid">
       <div class="panel">
         <h2>Pilot Login</h2>
@@ -340,6 +345,7 @@
       </div>
     </section>
 
+    <!-- PILOT DASHBOARD -->
     <section id="dashboardSection" class="hidden">
       <div class="panel">
         <div class="section-title">
@@ -375,9 +381,11 @@
       </div>
 
       <div class="grid" style="margin-top:18px">
+
+        <!-- MANUAL PIREP -->
         <div class="panel">
           <h2>Manual PIREP</h2>
-          <p class="muted">Submit a completed or planned flight report.</p>
+          <p class="muted">Submit a flight report manually.</p>
 
           <form id="flightForm">
             <label for="origin">Departure ICAO</label>
@@ -386,7 +394,7 @@
 
             <label for="destination">Destination ICAO</label>
             <input id="destination" type="text" required maxlength="4"
-                   pattern="[A-Za-z]{4}" placeholder="EGLL">
+                   pattern="[A-Za-z]{4}" placeholder="LIMC">
 
             <label for="aircraft">Aircraft</label>
             <input id="aircraft" type="text" required maxlength="80"
@@ -415,37 +423,114 @@
           <div id="flightMessage" class="message" role="status"></div>
         </div>
 
+        <!-- AUTOMATIC PIREP -->
         <div class="panel">
           <h2>Automatic PIREP</h2>
-          <p class="muted">
-            Automatic simulator telemetry is not connected in this version.
-          </p>
-          <div class="stat">
-            <div class="stat-label">ACARS CONNECTION</div>
-            <div class="stat-value">Not connected</div>
+
+          <div class="message info" role="status">
+            <strong>Bridge not connected</strong><br>
+            Live telemetry from Aerofly FS Global on Android is not
+            available yet. A compatible telemetry bridge must be
+            developed and connected before real simulator data can
+            be received.
           </div>
+
+          <div class="stat" style="margin-top:16px">
+            <div class="stat-label">TELEMETRY STATUS</div>
+            <div class="stat-value" id="acarsStatus">Not connected</div>
+            <p class="muted" id="acarsStatusDetail">
+              Waiting for a compatible telemetry bridge.
+            </p>
+          </div>
+
+          <div class="actions">
+            <button type="button" id="demoPreviewButton"
+                    class="secondary">
+              Load Test Preview
+            </button>
+          </div>
+
           <p class="muted">
-            A compatible simulator connector and a secure telemetry service
-            are required to transmit live flight data.
+            Test preview only: these are example values, not data
+            received from Aerofly. They must not be submitted as a
+            real flight.
           </p>
 
+          <form id="automaticPirepForm" class="hidden">
+            <h2>Review Flight Report</h2>
+
+            <p class="muted">
+              Review and correct the details before proceeding.
+              Nothing is saved until you confirm.
+            </p>
+
+            <label for="autoOrigin">Departure ICAO</label>
+            <input id="autoOrigin" type="text" maxlength="4"
+                   pattern="[A-Za-z]{4}" required>
+
+            <label for="autoDestination">Destination ICAO</label>
+            <input id="autoDestination" type="text" maxlength="4"
+                   pattern="[A-Za-z]{4}" required>
+
+            <label for="autoAircraft">Aircraft</label>
+            <input id="autoAircraft" type="text" maxlength="80"
+                   required>
+
+            <label for="autoStatus">Flight status</label>
+            <select id="autoStatus" required>
+              <option value="completed">Completed</option>
+              <option value="planned">Planned</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+
+            <label for="autoDuration">Duration (minutes)</label>
+            <input id="autoDuration" type="number"
+                   min="1" max="2000">
+
+            <label for="autoDistance">Distance (nautical miles)</label>
+            <input id="autoDistance" type="number"
+                   min="1" max="20000">
+
+            <div class="message info">
+              The current example cannot be saved as a real PIREP.
+              Real simulator telemetry is not connected yet.
+            </div>
+
+            <div class="actions">
+              <button type="submit" id="confirmAutomaticPirepButton">
+                Confirm and Save PIREP
+              </button>
+
+              <button type="button" id="cancelAutomaticPirepButton"
+                      class="secondary">
+                Cancel
+              </button>
+            </div>
+          </form>
+
+          <div id="automaticPirepMessage"
+               class="message" role="status"></div>
+
+          <!-- LIVE MAP -->
           <h2 style="margin-top:24px">Live Map</h2>
+
           <div class="stat">
             <div class="stat-label">LIVE POSITION</div>
             <div class="stat-value">Unavailable</div>
           </div>
+
           <p class="muted">
-            Live aircraft positions will appear here after a telemetry
-            service has been configured.
+            Live aircraft tracking will be available after the
+            telemetry bridge has been implemented and connected.
           </p>
         </div>
 
+        <!-- FLIGHT HISTORY -->
         <div class="panel wide">
           <div class="section-title">
             <h2>My Flight History</h2>
-            <button id="refreshButton" type="button" class="secondary">
-              Refresh
-            </button>
+            <button id="refreshButton" type="button"
+                    class="secondary">Refresh</button>
           </div>
 
           <div id="historyMessage" class="message" role="status"></div>
@@ -464,7 +549,9 @@
               </thead>
               <tbody id="flightHistory">
                 <tr>
-                  <td colspan="6">Sign in to load your flight history.</td>
+                  <td colspan="6">
+                    Sign in to load your flight history.
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -478,7 +565,6 @@
     EuroSky Airways Smart ACARS · Virtual Airline Operations
   </footer>
 
-  <!-- Keep config.js in the same GitHub Pages folder as index.html. -->
   <script src="./config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -491,6 +577,9 @@
       let client = null;
       let currentUser = null;
       let currentProfile = null;
+
+      // Test previews are never treated as real simulator telemetry.
+      let automaticPreviewIsDemo = false;
 
       function showMessage(id, message, type = "info") {
         const el = $(id);
@@ -509,7 +598,9 @@
         button.disabled = busy;
 
         if (busy) {
-          button.dataset.originalLabel = button.textContent;
+          if (!button.dataset.originalLabel) {
+            button.dataset.originalLabel = button.textContent;
+          }
           button.textContent = label;
         } else {
           button.textContent =
@@ -518,7 +609,8 @@
       }
 
       function friendlyError(error) {
-        const message = error?.message || "An unexpected error occurred.";
+        const message =
+          error?.message || "An unexpected error occurred.";
 
         if (/invalid login credentials/i.test(message)) {
           return "Incorrect email or password.";
@@ -533,7 +625,7 @@
         }
 
         if (/row-level security|permission denied/i.test(message)) {
-          return "Database permission denied. Please check the Supabase RLS policies.";
+          return "Database permission denied. Please check Supabase RLS policies.";
         }
 
         return message;
@@ -550,16 +642,19 @@
           );
         }
 
-        if (!window.supabase || !window.supabase.createClient) {
+        if (!window.supabase ||
+            !window.supabase.createClient) {
           throw new Error(
             "Supabase library could not load. Check your internet connection."
           );
         }
 
-        client = window.supabase.createClient(
-          config.SUPABASE_URL,
-          config.SUPABASE_PUBLISHABLE_KEY
-        );
+        if (!client) {
+          client = window.supabase.createClient(
+            config.SUPABASE_URL,
+            config.SUPABASE_PUBLISHABLE_KEY
+          );
+        }
       }
 
       function showAuth() {
@@ -647,6 +742,7 @@
         } else {
           for (const flight of flights) {
             const tr = document.createElement("tr");
+
             const values = [
               flight.created_at
                 ? new Date(flight.created_at).toLocaleDateString()
@@ -699,7 +795,7 @@
           if (!profile.callsign && user.user_metadata?.callsign) {
             showMessage(
               "dashboardMessage",
-              "Your profile is missing a callsign. Update the callsign in your pilot profile database if needed.",
+              "Your profile is missing a callsign. Update your pilot profile in Supabase if needed.",
               "info"
             );
           } else {
@@ -716,13 +812,14 @@
         }
       }
 
+      // LOGIN
       $("loginForm").addEventListener("submit", async (event) => {
         event.preventDefault();
         clearMessage("loginMessage");
         setBusy("loginButton", true, "Signing in…");
 
         try {
-          if (!client) validateConfig();
+          validateConfig();
 
           const email = $("loginEmail").value.trim();
           const password = $("loginPassword").value;
@@ -748,13 +845,14 @@
         }
       });
 
+      // REGISTRATION
       $("registerForm").addEventListener("submit", async (event) => {
         event.preventDefault();
         clearMessage("registerMessage");
         setBusy("registerButton", true, "Creating account…");
 
         try {
-          if (!client) validateConfig();
+          validateConfig();
 
           const fullName = $("registerName").value.trim();
           const callsign = $("registerCallsign").value.trim();
@@ -765,7 +863,6 @@
             throw new Error("Please complete all registration fields.");
           }
 
-          // Corrected Supabase signUp syntax.
           const { data, error } = await client.auth.signUp({
             email: email,
             password: password,
@@ -799,6 +896,7 @@
         }
       });
 
+      // LOGOUT
       $("logoutButton").addEventListener("click", async () => {
         try {
           const { error } = await client.auth.signOut();
@@ -806,8 +904,13 @@
 
           currentUser = null;
           currentProfile = null;
+
           showAuth();
-          showMessage("loginMessage", "You have signed out.", "success");
+          showMessage(
+            "loginMessage",
+            "You have signed out.",
+            "success"
+          );
         } catch (error) {
           showMessage(
             "dashboardMessage",
@@ -817,6 +920,7 @@
         }
       });
 
+      // MANUAL PIREP
       $("flightForm").addEventListener("submit", async (event) => {
         event.preventDefault();
         clearMessage("flightMessage");
@@ -857,11 +961,29 @@
           };
 
           if (durationValue !== "") {
-            payload.duration_minutes = Number(durationValue);
+            const duration = Number(durationValue);
+
+            if (!Number.isInteger(duration) ||
+                duration < 1 || duration > 2000) {
+              throw new Error(
+                "Duration must be between 1 and 2000 minutes."
+              );
+            }
+
+            payload.duration_minutes = duration;
           }
 
           if (distanceValue !== "") {
-            payload.distance_nm = Number(distanceValue);
+            const distance = Number(distanceValue);
+
+            if (!Number.isFinite(distance) ||
+                distance < 1 || distance > 20000) {
+              throw new Error(
+                "Distance must be between 1 and 20000 NM."
+              );
+            }
+
+            payload.distance_nm = distance;
           }
 
           const { error } = await client
@@ -890,8 +1012,180 @@
         }
       });
 
+      // AUTOMATIC PIREP TEST PREVIEW
+      $("demoPreviewButton").addEventListener("click", () => {
+        $("autoOrigin").value = "LIRF";
+        $("autoDestination").value = "LIMC";
+        $("autoAircraft").value = "Boeing 737-800";
+        $("autoStatus").value = "completed";
+        $("autoDuration").value = "60";
+        $("autoDistance").value = "250";
+
+        automaticPreviewIsDemo = true;
+
+        $("automaticPirepForm").classList.remove("hidden");
+
+        $("acarsStatus").textContent = "Bridge not connected";
+        $("acarsStatusDetail").textContent =
+          "Example values only. No simulator telemetry has been received.";
+
+        showMessage(
+          "automaticPirepMessage",
+          "Test preview loaded. These are example values, not a real flight. Saving is disabled until real telemetry is connected.",
+          "info"
+        );
+      });
+
+      // CANCEL AUTOMATIC PIREP
+      $("cancelAutomaticPirepButton").addEventListener("click", () => {
+        $("automaticPirepForm").classList.add("hidden");
+        clearMessage("automaticPirepMessage");
+      });
+
+      // AUTOMATIC PIREP REVIEW AND SAVE
+      $("automaticPirepForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        clearMessage("automaticPirepMessage");
+
+        if (!client || !currentUser) {
+          showMessage(
+            "automaticPirepMessage",
+            "Please sign in before submitting a PIREP.",
+            "error"
+          );
+          return;
+        }
+
+        // Important safety check: demo values are never saved.
+        if (automaticPreviewIsDemo) {
+          showMessage(
+            "automaticPirepMessage",
+            "Save blocked: these are test values, not data received from Aerofly. The telemetry bridge must be connected before automatic PIREPs can be submitted.",
+            "error"
+          );
+          return;
+        }
+
+        const origin = $("autoOrigin").value.trim().toUpperCase();
+        const destination =
+          $("autoDestination").value.trim().toUpperCase();
+        const aircraft = $("autoAircraft").value.trim();
+        const status = $("autoStatus").value;
+        const durationValue = $("autoDuration").value;
+        const distanceValue = $("autoDistance").value;
+
+        if (!/^[A-Z]{4}$/.test(origin) ||
+            !/^[A-Z]{4}$/.test(destination)) {
+          showMessage(
+            "automaticPirepMessage",
+            "Enter valid four-letter ICAO airport codes.",
+            "error"
+          );
+          return;
+        }
+
+        if (origin === destination) {
+          showMessage(
+            "automaticPirepMessage",
+            "Departure and destination must be different.",
+            "error"
+          );
+          return;
+        }
+
+        if (!aircraft) {
+          showMessage(
+            "automaticPirepMessage",
+            "Enter the aircraft type.",
+            "error"
+          );
+          return;
+        }
+
+        const payload = {
+          pilot_id: currentUser.id,
+          origin_icao: origin,
+          destination_icao: destination,
+          aircraft: aircraft,
+          status: status
+        };
+
+        if (durationValue !== "") {
+          const duration = Number(durationValue);
+
+          if (!Number.isInteger(duration) ||
+              duration < 1 || duration > 2000) {
+            showMessage(
+              "automaticPirepMessage",
+              "Duration must be between 1 and 2000 minutes.",
+              "error"
+            );
+            return;
+          }
+
+          payload.duration_minutes = duration;
+        }
+
+        if (distanceValue !== "") {
+          const distance = Number(distanceValue);
+
+          if (!Number.isFinite(distance) ||
+              distance < 1 || distance > 20000) {
+            showMessage(
+              "automaticPirepMessage",
+              "Distance must be between 1 and 20000 NM.",
+              "error"
+            );
+            return;
+          }
+
+          payload.distance_nm = distance;
+        }
+
+        const confirmed = window.confirm(
+          "Confirm this flight report and save it to Supabase?"
+        );
+
+        if (!confirmed) return;
+
+        setBusy(
+          "confirmAutomaticPirepButton",
+          true,
+          "Saving…"
+        );
+
+        try {
+          const { error } = await client
+            .from("flights")
+            .insert(payload);
+
+          if (error) throw error;
+
+          $("automaticPirepForm").classList.add("hidden");
+
+          showMessage(
+            "automaticPirepMessage",
+            "PIREP saved successfully.",
+            "success"
+          );
+
+          await loadFlightHistory();
+        } catch (error) {
+          showMessage(
+            "automaticPirepMessage",
+            friendlyError(error),
+            "error"
+          );
+        } finally {
+          setBusy("confirmAutomaticPirepButton", false);
+        }
+      });
+
+      // REFRESH FLIGHT HISTORY
       $("refreshButton").addEventListener("click", loadFlightHistory);
 
+      // INITIALIZATION
       async function initialize() {
         try {
           validateConfig();
@@ -905,7 +1199,7 @@
             showAuth();
           }
 
-          client.auth.onAuthStateChange((event, session) => {
+          client.auth.onAuthStateChange((event) => {
             if (event === "SIGNED_OUT") {
               currentUser = null;
               currentProfile = null;
@@ -914,11 +1208,13 @@
           });
         } catch (error) {
           showAuth();
+
           showMessage(
             "loginMessage",
             friendlyError(error),
             "error"
           );
+
           showMessage(
             "registerMessage",
             friendlyError(error),
