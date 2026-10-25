@@ -166,8 +166,8 @@ footer{border-top:1px solid var(--border);color:var(--muted);text-align:center;p
       <div id="companyFlightsMessage" class="message" role="status"></div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Date</th><th>Flight</th><th>Aircraft</th><th>Status</th><th>Duration</th><th>Distance</th></tr></thead>
-          <tbody id="companyFlights"><tr><td colspan="6">Loading flight board…</td></tr></tbody>
+          <thead><tr><th>Date</th><th>Pilot</th><th>Flight</th><th>Aircraft</th><th>Status</th><th>Duration</th><th>Distance</th></tr></thead>
+          <tbody id="companyFlights"><tr><td colspan="7">Loading flight board…</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -191,8 +191,39 @@ footer{border-top:1px solid var(--border);color:var(--muted);text-align:center;p
         <form id="flightForm">
           <label for="origin">Departure ICAO</label><input id="origin" required maxlength="4" pattern="[A-Za-z]{4}" placeholder="LIRF">
           <label for="destination">Destination ICAO</label><input id="destination" required maxlength="4" pattern="[A-Za-z]{4}" placeholder="LIMC">
-          <label for="aircraft">Aircraft</label><input id="aircraft" required maxlength="80" placeholder="Boeing 737-800">
-          <label for="duration">Flight duration (minutes)</label><input id="duration" type="number" required min="1" max="2000" placeholder="120">
+          <label for="aircraft">Aircraft</label>
+          <select id="aircraft" required>
+            <option value="">Select aircraft</option>
+            <option>Airbus 312</option>
+            <option>Airbus 320ceo</option>
+            <option>Airbus 320Neo</option>
+            <option>Airbus 321ceo</option>
+            <option>Airbus 321XLR/NEO</option>
+            <option>Airbus 330-300</option>
+            <option>Airbus 350-1000</option>
+            <option>Airbus 380</option>
+            <option>Boeing 737-500</option>
+            <option>Boeing 737-800</option>
+            <option>Boeing 737-900</option>
+            <option>Boeing 737 Max-9</option>
+            <option>Boeing 747-400</option>
+            <option>Boeing 777-200</option>
+            <option>Boeing 777F</option>
+            <option>Boeing 777-300ER</option>
+            <option>Boeing 787-9</option>
+            <option>Boeing 787-10</option>
+            <option>Dash-8</option>
+          </select>
+          <div class="grid" style="gap:10px">
+            <div>
+              <label for="durationHours">Flight duration — hours</label>
+              <input id="durationHours" type="number" required min="0" max="33" step="1" placeholder="5">
+            </div>
+            <div>
+              <label for="durationMinutes">Flight duration — minutes</label>
+              <input id="durationMinutes" type="number" required min="0" max="59" step="1" placeholder="25">
+            </div>
+          </div>
           <label for="distance">Distance (nautical miles)</label><input id="distance" type="number" required min="1" max="20000" placeholder="350">
           <div class="stat" style="margin-top:14px"><div class="stat-label">REPORT STATUS</div><div class="stat-value">Pending review</div></div>
           <div class="actions"><button id="flightButton" type="submit">Submit PIREP</button></div>
@@ -283,32 +314,48 @@ function validateConfig(){
   if(!client)client=window.supabase.createClient(c.SUPABASE_URL,c.SUPABASE_PUBLISHABLE_KEY);
 }
 function showAuth(){
-  $("authSection").classList.remove("hidden");$("dashboardSection").classList.add("hidden");$("menuButton").classList.add("hidden");
+  $("authSection").classList.remove("hidden");
+  $("dashboardSection").classList.add("hidden");
+  $("menuButton").classList.add("hidden");
 }
 function showDashboard(){
-  $("authSection").classList.add("hidden");$("dashboardSection").classList.remove("hidden");$("menuButton").classList.remove("hidden");
+  $("authSection").classList.add("hidden");
+  $("dashboardSection").classList.remove("hidden");
+  $("menuButton").classList.remove("hidden");
 }
 function cell(tr,value){
-  const td=document.createElement("td");td.textContent=value==null?"—":String(value);tr.appendChild(td);return td;
+  const td=document.createElement("td");
+  td.textContent=value==null?"—":String(value);
+  tr.appendChild(td);
+  return td;
 }
 function statusCell(tr,status){
   const td=document.createElement("td"),s=document.createElement("span");
-  s.className="status "+String(status||"").toLowerCase();s.textContent=status||"unknown";td.appendChild(s);tr.appendChild(td);
+  s.className="status "+String(status||"").toLowerCase();
+  s.textContent=status||"unknown";
+  td.appendChild(s);
+  tr.appendChild(td);
 }
 function button(label,cls,action){
-  const b=document.createElement("button");b.type="button";b.textContent=label;b.className=cls||"secondary";b.addEventListener("click",action);return b;
+  const b=document.createElement("button");
+  b.type="button";b.textContent=label;b.className=cls||"secondary";
+  b.addEventListener("click",action);
+  return b;
 }
 function openMenu(){
-  $("drawerBackdrop").classList.remove("hidden");$("menuButton").setAttribute("aria-expanded","true");
+  $("drawerBackdrop").classList.remove("hidden");
+  $("menuButton").setAttribute("aria-expanded","true");
 }
 function closeMenu(){
-  $("drawerBackdrop").classList.add("hidden");$("menuButton").setAttribute("aria-expanded","false");
+  $("drawerBackdrop").classList.add("hidden");
+  $("menuButton").setAttribute("aria-expanded","false");
 }
 $("menuButton").addEventListener("click",openMenu);
 $("closeMenu").addEventListener("click",closeMenu);
 $("drawerBackdrop").addEventListener("click",e=>{if(e.target===$("drawerBackdrop"))closeMenu();});
 document.querySelectorAll("[data-scroll]").forEach(b=>b.addEventListener("click",()=>{
-  closeMenu();$(b.dataset.scroll)?.scrollIntoView({behavior:"smooth",block:"start"});
+  closeMenu();
+  $(b.dataset.scroll)?.scrollIntoView({behavior:"smooth",block:"start"});
 }));
 $("drawerLogout").addEventListener("click",logout);
 
@@ -316,7 +363,8 @@ async function loadProfile(user){
   const {data,error}=await client.from("pilot_profiles").select("*").eq("id",user.id).maybeSingle();
   if(error)throw error;
   if(!data)throw new Error("Pilot profile not found. Contact an administrator.");
-  currentProfile=data;return data;
+  currentProfile=data;
+  return data;
 }
 async function checkAdmin(user){
   const {data,error}=await client.from("admin_users").select("user_id").eq("user_id",user.id).maybeSingle();
@@ -330,7 +378,9 @@ async function getAllFlights(){
   allFlights=data||[];
   const totals={};
   for(const f of allFlights){
-    if(f.status==="approved"&&f.duration_minutes!=null)totals[f.pilot_id]=(totals[f.pilot_id]||0)+Number(f.duration_minutes);
+    if(f.status==="approved"&&f.duration_minutes!=null){
+      totals[f.pilot_id]=(totals[f.pilot_id]||0)+Number(f.duration_minutes);
+    }
   }
   approvedHoursByPilot=totals;
   return allFlights;
@@ -338,7 +388,37 @@ async function getAllFlights(){
 function hoursFor(id){return(approvedHoursByPilot[id]||0)/60;}
 async function getRanks(){
   const {data,error}=await client.from("pilot_ranks").select("*").order("display_order");
-  if(error)throw error;return data||[];
+  if(error)throw error;
+  return data||[];
+}
+function pilotDisplayName(id){
+  const p=profileIndex[id];
+  if(!p)return"Pilot";
+  const name=(p.full_name||"").trim();
+  const callsign=(p.callsign||"").trim();
+  if(name&&callsign)return name+" ("+callsign+")";
+  return name||callsign||("Pilot "+(p.pilot_number??""));
+}
+function formatDuration(minutes){
+  if(minutes==null||!Number.isFinite(Number(minutes)))return"—";
+  const total=Math.max(0,Math.floor(Number(minutes)));
+  const hours=Math.floor(total/60);
+  const mins=total%60;
+  return hours+" hours "+mins+" minutes";
+}
+function escapeHTML(value){
+  return String(value??"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+async function loadPublicProfiles(){
+  const {data,error}=await client.from("pilot_public_profiles")
+    .select("id,full_name,callsign,pilot_number");
+  if(error)throw error;
+  profileIndex={};
+  for(const p of data||[])profileIndex[p.id]=p;
 }
 function updatePersonalUI(){
   if(!currentUser||!currentProfile)return;
@@ -360,20 +440,27 @@ function updatePersonalUI(){
 function renderCompanyFlights(){
   const tbody=$("companyFlights");tbody.replaceChildren();
   const list=allFlights.filter(f=>currentFilter==="all"||f.status===currentFilter);
-  if(!list.length){const tr=document.createElement("tr");cell(tr,"No flights found for this filter.").colSpan=6;tbody.appendChild(tr);return;}
+  if(!list.length){
+    const tr=document.createElement("tr");
+    cell(tr,"No flights found for this filter.").colSpan=7;
+    tbody.appendChild(tr);
+    return;
+  }
   for(const f of list){
     const tr=document.createElement("tr");
     cell(tr,f.created_at?new Date(f.created_at).toLocaleDateString():"—");
+    cell(tr,pilotDisplayName(f.pilot_id));
     cell(tr,(f.origin_icao||"—")+" → "+(f.destination_icao||"—"));
     cell(tr,f.aircraft||"—");
     statusCell(tr,f.status);
-    cell(tr,f.duration_minutes==null?"—":f.duration_minutes+" min");
+    cell(tr,formatDuration(f.duration_minutes));
     cell(tr,f.distance_nm==null?"—":f.distance_nm+" NM");
     tbody.appendChild(tr);
   }
 }
 document.querySelectorAll("[data-flight-filter]").forEach(b=>b.addEventListener("click",()=>{
-  currentFilter=b.dataset.flightFilter;renderCompanyFlights();
+  currentFilter=b.dataset.flightFilter;
+  renderCompanyFlights();
 }));
 function updateCompanyStats(){
   $("statFlights").textContent=String(allFlights.length);
@@ -386,104 +473,185 @@ async function loadHistory(){
   const {data,error}=await client.from("flights").select("*").eq("pilot_id",currentUser.id).order("created_at",{ascending:false});
   if(error)throw error;
   const tbody=$("flightHistory");tbody.replaceChildren();
-  if(!(data||[]).length){const tr=document.createElement("tr");cell(tr,"No personal flights submitted yet.").colSpan=5;tbody.appendChild(tr);return;}
+  if(!(data||[]).length){
+    const tr=document.createElement("tr");
+    cell(tr,"No personal flights submitted yet.").colSpan=5;
+    tbody.appendChild(tr);
+    return;
+  }
   for(const f of data){
     const tr=document.createElement("tr");
     cell(tr,f.created_at?new Date(f.created_at).toLocaleDateString():"—");
     cell(tr,(f.origin_icao||"—")+" → "+(f.destination_icao||"—"));
-    statusCell(tr,f.status);cell(tr,f.duration_minutes==null?"—":f.duration_minutes+" min");
-    cell(tr,f.distance_nm==null?"—":f.distance_nm+" NM");tbody.appendChild(tr);
+    statusCell(tr,f.status);
+    cell(tr,formatDuration(f.duration_minutes));
+    cell(tr,f.distance_nm==null?"—":f.distance_nm+" NM");
+    tbody.appendChild(tr);
   }
 }
 async function openDashboard(user){
-  currentUser=user;showDashboard();$("pilotEmail").textContent=user.email||"—";
+  currentUser=user;
+  showDashboard();
+  $("pilotEmail").textContent=user.email||"—";
   message("dashboardMessage","Loading VA operations…");
   try{
-    await loadProfile(user);await checkAdmin(user);await getAllFlights();
-    updatePersonalUI();updateCompanyStats();renderCompanyFlights();await loadHistory();
-    await initMap();await loadRoutes();
-    if(isAdmin){await loadAdminFlights();await loadAdminPilots();await loadAdminRanks();}
+    await loadProfile(user);
+    await checkAdmin(user);
+    await getAllFlights();
+    await loadPublicProfiles();
+    updatePersonalUI();
+    updateCompanyStats();
+    renderCompanyFlights();
+    await loadHistory();
+    await initMap();
+    await loadRoutes();
+    if(isAdmin){
+      await loadAdminFlights();
+      await loadAdminPilots();
+      await loadAdminRanks();
+    }
     clearMessage("dashboardMessage");
-  }catch(e){message("dashboardMessage",friendly(e),"error");}
+  }catch(e){
+    message("dashboardMessage",friendly(e),"error");
+  }
 }
 $("loginForm").addEventListener("submit",async e=>{
-  e.preventDefault();clearMessage("loginMessage");busy("loginButton",true,"Signing in…");
+  e.preventDefault();
+  clearMessage("loginMessage");
+  busy("loginButton",true,"Signing in…");
   try{
     validateConfig();
-    const {data,error}=await client.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});
-    if(error)throw error;if(data.user)await openDashboard(data.user);
-  }catch(e2){message("loginMessage",friendly(e2),"error");}
-  finally{busy("loginButton",false);}
+    const {data,error}=await client.auth.signInWithPassword({
+      email:$("loginEmail").value.trim(),
+      password:$("loginPassword").value
+    });
+    if(error)throw error;
+    if(data.user)await openDashboard(data.user);
+  }catch(e2){
+    message("loginMessage",friendly(e2),"error");
+  }finally{
+    busy("loginButton",false);
+  }
 });
 $("registerForm").addEventListener("submit",async e=>{
-  e.preventDefault();busy("registerButton",true,"Creating account…");
+  e.preventDefault();
+  busy("registerButton",true,"Creating account…");
   try{
     validateConfig();
     const {data,error}=await client.auth.signUp({
-      email:$("registerEmail").value.trim(),password:$("registerPassword").value,
-      options:{data:{full_name:$("registerName").value.trim(),callsign:$("registerCallsign").value.trim()}}
+      email:$("registerEmail").value.trim(),
+      password:$("registerPassword").value,
+      options:{data:{
+        full_name:$("registerName").value.trim(),
+        callsign:$("registerCallsign").value.trim()
+      }}
     });
     if(error)throw error;
     if(data.session&&data.user)await openDashboard(data.user);
     else message("registerMessage","Registration received. Confirm your email, then sign in.","success");
-  }catch(e2){message("registerMessage",friendly(e2),"error");}
-  finally{busy("registerButton",false);}
+  }catch(e2){
+    message("registerMessage",friendly(e2),"error");
+  }finally{
+    busy("registerButton",false);
+  }
 });
 $("forgotButton").addEventListener("click",async()=>{
   try{
-    validateConfig();const email=$("loginEmail").value.trim();
+    validateConfig();
+    const email=$("loginEmail").value.trim();
     if(!email)throw new Error("Enter your email address in the login field first.");
-    const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+    const {error}=await client.auth.resetPasswordForEmail(email,{
+      redirectTo:location.origin+location.pathname
+    });
     if(error)throw error;
     message("loginMessage","If the account exists, a password recovery email has been requested.","success");
-  }catch(e){message("loginMessage",friendly(e),"error");}
+  }catch(e){
+    message("loginMessage",friendly(e),"error");
+  }
 });
 async function logout(){
-  try{const {error}=await client.auth.signOut();if(error)throw error;
-    currentUser=null;currentProfile=null;isAdmin=false;closeMenu();showAuth();
-  }catch(e){message("dashboardMessage",friendly(e),"error");}
+  try{
+    const {error}=await client.auth.signOut();
+    if(error)throw error;
+    currentUser=null;currentProfile=null;isAdmin=false;
+    closeMenu();showAuth();
+  }catch(e){
+    message("dashboardMessage",friendly(e),"error");
+  }
 }
-
 $("flightForm").addEventListener("submit",async e=>{
-  e.preventDefault();busy("flightButton",true,"Submitting…");
+  e.preventDefault();
+  busy("flightButton",true,"Submitting…");
   try{
     const origin=$("origin").value.trim().toUpperCase();
     const destination=$("destination").value.trim().toUpperCase();
-    const aircraft=$("aircraft").value.trim();
-    const duration=Number($("duration").value),distance=Number($("distance").value);
-    if(!/^[A-Z]{4}$/.test(origin)||!/^[A-Z]{4}$/.test(destination))throw new Error("Use valid four-letter ICAO airport codes.");
+    const aircraft=$("aircraft").value;
+    const hours=Number($("durationHours").value);
+    const minutes=Number($("durationMinutes").value);
+    const duration=hours*60+minutes;
+    const distance=Number($("distance").value);
+    if(!/^[A-Z]{4}$/.test(origin)||!/^[A-Z]{4}$/.test(destination)){
+      throw new Error("Use valid four-letter ICAO airport codes.");
+    }
     if(origin===destination)throw new Error("Departure and destination must be different.");
-    if(!aircraft)throw new Error("Enter the aircraft type.");
-    if(!Number.isInteger(duration)||duration<1||duration>2000)throw new Error("Duration must be 1–2000 minutes.");
-    if(!Number.isFinite(distance)||distance<1||distance>20000)throw new Error("Distance must be 1–20000 NM.");
+    if(!aircraft)throw new Error("Select an aircraft type.");
+    if(!Number.isInteger(hours)||hours<0||hours>33||
+       !Number.isInteger(minutes)||minutes<0||minutes>59){
+      throw new Error("Enter whole hours and minutes between 0 and 59.");
+    }
+    if(duration<1||duration>2000){
+      throw new Error("Total flight duration must be between 1 and 2000 minutes.");
+    }
+    if(!Number.isFinite(distance)||distance<1||distance>20000){
+      throw new Error("Distance must be 1–20000 NM.");
+    }
     const {error}=await client.from("flights").insert({
-      pilot_id:currentUser.id,origin_icao:origin,destination_icao:destination,
-      aircraft,duration_minutes:duration,distance_nm:distance,status:"pending"
+      pilot_id:currentUser.id,
+      origin_icao:origin,
+      destination_icao:destination,
+      aircraft,
+      duration_minutes:duration,
+      distance_nm:distance,
+      status:"pending"
     });
     if(error)throw error;
-    $("flightForm").reset();message("flightMessage","PIREP submitted successfully. Status: Pending review.","success");
+    $("flightForm").reset();
+    message("flightMessage","PIREP submitted successfully. Status: Pending review.","success");
     await refreshData();
-  }catch(e2){message("flightMessage",friendly(e2),"error");}
-  finally{busy("flightButton",false);}
+  }catch(e2){
+    message("flightMessage",friendly(e2),"error");
+  }finally{
+    busy("flightButton",false);
+  }
 });
-
 async function loadAdminFlights(){
   if(!isAdmin)return;
   const {data,error}=await client.from("flights").select("*").order("created_at",{ascending:false});
-  if(error){message("adminMessage",friendly(error),"error");return;}
+  if(error){
+    message("adminMessage",friendly(error),"error");
+    return;
+  }
   const tbody=$("adminFlights");tbody.replaceChildren();
-  const {data:profiles}=await client.from("pilot_profiles").select("id,full_name,callsign,pilot_number");
-  profileIndex={};for(const p of profiles||[])profileIndex[p.id]=p;
-  if(!(data||[]).length){const tr=document.createElement("tr");cell(tr,"No flight reports.").colSpan=7;tbody.appendChild(tr);return;}
+  if(!(data||[]).length){
+    const tr=document.createElement("tr");
+    cell(tr,"No flight reports.").colSpan=7;
+    tbody.appendChild(tr);
+    return;
+  }
   for(const f of data){
     const tr=document.createElement("tr"),p=profileIndex[f.pilot_id]||{};
     cell(tr,f.created_at?new Date(f.created_at).toLocaleDateString():"—");
     cell(tr,(p.pilot_number??"—")+" · "+(p.callsign||p.full_name||"Pilot"));
     cell(tr,(f.origin_icao||"—")+" → "+(f.destination_icao||"—"));
-    cell(tr,f.aircraft||"—");cell(tr,f.duration_minutes==null?"—":f.duration_minutes+" min");statusCell(tr,f.status);
+    cell(tr,f.aircraft||"—");
+    cell(tr,formatDuration(f.duration_minutes));
+    statusCell(tr,f.status);
     const td=document.createElement("td");
     if(f.status==="pending"){
-      td.append(button("Approve","success",()=>reviewFlight(f.id,"approved")),button("Reject","danger",()=>reviewFlight(f.id,"rejected")));
+      td.append(
+        button("Approve","success",()=>reviewFlight(f.id,"approved")),
+        button("Reject","danger",()=>reviewFlight(f.id,"rejected"))
+      );
     }else{
       td.append(button("Set Pending","secondary",()=>reviewFlight(f.id,"pending")));
       if(f.status!=="approved")td.append(button("Approve","success",()=>reviewFlight(f.id,"approved")));
@@ -496,45 +664,86 @@ async function reviewFlight(id,status){
   if(!isAdmin)return;
   if(!confirm("Change this PIREP status to "+status+"?"))return;
   try{
-    const {error}=await client.from("flights").update({status,reviewed_at:new Date().toISOString(),reviewed_by:currentUser.id}).eq("id",id);
+    const {error}=await client.from("flights").update({
+      status,
+      reviewed_at:new Date().toISOString(),
+      reviewed_by:currentUser.id
+    }).eq("id",id);
     if(error)throw error;
-    message("adminMessage","PIREP status updated: "+status,"success");await refreshData();
-  }catch(e){message("adminMessage",friendly(e),"error");}
+    message("adminMessage","PIREP status updated: "+status,"success");
+    await refreshData();
+  }catch(e){
+    message("adminMessage",friendly(e),"error");
+  }
 }
 async function loadAdminPilots(){
   if(!isAdmin)return;
   const {data,error}=await client.from("pilot_profiles").select("*").order("pilot_number");
-  if(error){message("adminMessage",friendly(error),"error");return;}
+  if(error){
+    message("adminMessage",friendly(error),"error");
+    return;
+  }
   const ranks=await getRanks(),tbody=$("adminPilots");tbody.replaceChildren();
   for(const p of data||[]){
-    const tr=document.createElement("tr");cell(tr,p.email||"Email unavailable");cell(tr,p.pilot_number);
+    const tr=document.createElement("tr");
+    cell(tr,p.email||"Email unavailable");
+    cell(tr,p.pilot_number);
     const nameTd=document.createElement("td"),name=document.createElement("input");
-    name.value=p.full_name||"";name.maxLength=100;nameTd.appendChild(name);tr.appendChild(nameTd);
+    name.value=p.full_name||"";name.maxLength=100;
+    nameTd.appendChild(name);tr.appendChild(nameTd);
     const callTd=document.createElement("td"),call=document.createElement("input");
-    call.value=p.callsign||"";call.maxLength=40;callTd.appendChild(call);tr.appendChild(callTd);
+    call.value=p.callsign||"";call.maxLength=40;
+    callTd.appendChild(call);tr.appendChild(callTd);
     const rankTd=document.createElement("td"),rank=document.createElement("select");
-    for(const r of ranks){const o=document.createElement("option");o.value=r.rank_name;o.textContent=r.rank_name;rank.appendChild(o);}
-    if(!(ranks||[]).some(r=>r.rank_name===p.rank)){const o=document.createElement("option");o.value=p.rank||"Student Pilot";o.textContent=p.rank||"Student Pilot";rank.appendChild(o);}
-    rank.value=p.rank||"Student Pilot";rankTd.appendChild(rank);tr.appendChild(rankTd);
+    for(const r of ranks){
+      const o=document.createElement("option");
+      o.value=r.rank_name;o.textContent=r.rank_name;rank.appendChild(o);
+    }
+    if(!ranks.some(r=>r.rank_name===p.rank)){
+      const o=document.createElement("option");
+      o.value=p.rank||"Student Pilot";o.textContent=p.rank||"Student Pilot";
+      rank.appendChild(o);
+    }
+    rank.value=p.rank||"Student Pilot";
+    rankTd.appendChild(rank);tr.appendChild(rankTd);
     cell(tr,hoursFor(p.id).toFixed(1));
     const actionTd=document.createElement("td");
     actionTd.append(
       button("Save","success",async()=>{
         try{
-          const {error}=await client.from("pilot_profiles").update({full_name:name.value.trim(),callsign:call.value.trim(),rank:rank.value}).eq("id",p.id);
+          const {error}=await client.from("pilot_profiles").update({
+            full_name:name.value.trim(),
+            callsign:call.value.trim(),
+            rank:rank.value
+          }).eq("id",p.id);
           if(error)throw error;
           message("adminMessage","Pilot profile saved.","success");
-          if(p.id===currentUser.id){await loadProfile(currentUser);updatePersonalUI();}
+          if(p.id===currentUser.id){
+            await loadProfile(currentUser);
+            updatePersonalUI();
+          }
           await loadAdminPilots();
-        }catch(e){message("adminMessage",friendly(e),"error");}
+          await loadPublicProfiles();
+          renderCompanyFlights();
+          await loadRoutes();
+        }catch(e){
+          message("adminMessage",friendly(e),"error");
+        }
       }),
       button("Reset password","secondary",async()=>{
-        if(!p.email){message("adminMessage","Email unavailable for this pilot.","error");return;}
+        if(!p.email){
+          message("adminMessage","Email unavailable for this pilot.","error");
+          return;
+        }
         try{
-          const {error}=await client.auth.resetPasswordForEmail(p.email,{redirectTo:location.origin+location.pathname});
+          const {error}=await client.auth.resetPasswordForEmail(p.email,{
+            redirectTo:location.origin+location.pathname
+          });
           if(error)throw error;
           message("adminMessage","Password recovery email requested for "+p.email+".","success");
-        }catch(e){message("adminMessage",friendly(e),"error");}
+        }catch(e){
+          message("adminMessage",friendly(e),"error");
+        }
       })
     );
     tr.appendChild(actionTd);tbody.appendChild(tr);
@@ -548,7 +757,9 @@ async function loadAdminRanks(){
     cell(tr,r.rank_name);cell(tr,r.required_hours);cell(tr,r.display_order);
     const td=document.createElement("td");
     td.append(button("Edit","secondary",()=>{
-      $("rankName").value=r.rank_name;$("rankHours").value=r.required_hours;$("rankOrder").value=r.display_order;
+      $("rankName").value=r.rank_name;
+      $("rankHours").value=r.required_hours;
+      $("rankOrder").value=r.display_order;
       $("rankForm").scrollIntoView({behavior:"smooth",block:"center"});
     }));
     td.append(button("Remove","danger",()=>deleteRank(r.rank_name)));
@@ -558,24 +769,42 @@ async function loadAdminRanks(){
 async function deleteRank(rankName){
   if(!isAdmin)return;
   try{
-    const {count,error:checkError}=await client.from("pilot_profiles").select("id",{count:"exact",head:true}).eq("rank",rankName);
+    const {count,error:checkError}=await client.from("pilot_profiles")
+      .select("id",{count:"exact",head:true}).eq("rank",rankName);
     if(checkError)throw checkError;
-    if(count>0){message("adminMessage","Cannot remove this rank: one or more pilots are currently assigned to it. Reassign those pilots first.","error");return;}
+    if(count>0){
+      message("adminMessage","Cannot remove this rank: one or more pilots are currently assigned to it. Reassign those pilots first.","error");
+      return;
+    }
     if(!confirm('Remove the rank "'+rankName+'"? This cannot be undone.'))return;
     const {error}=await client.from("pilot_ranks").delete().eq("rank_name",rankName);
     if(error)throw error;
-    message("adminMessage","Rank removed.","success");await loadAdminRanks();await loadAdminPilots();
-  }catch(e){message("adminMessage",friendly(e),"error");}
+    message("adminMessage","Rank removed.","success");
+    await loadAdminRanks();await loadAdminPilots();
+  }catch(e){
+    message("adminMessage",friendly(e),"error");
+  }
 }
 $("rankForm").addEventListener("submit",async e=>{
   e.preventDefault();if(!isAdmin)return;
   try{
-    const rank_name=$("rankName").value.trim(),required_hours=Number($("rankHours").value),display_order=Number($("rankOrder").value);
-    if(!rank_name||!Number.isFinite(required_hours)||required_hours<0||!Number.isInteger(display_order)||display_order<0)throw new Error("Enter a valid rank name, hour threshold and display order.");
-    const {error}=await client.from("pilot_ranks").upsert({rank_name,required_hours,display_order});
+    const rank_name=$("rankName").value.trim();
+    const required_hours=Number($("rankHours").value);
+    const display_order=Number($("rankOrder").value);
+    if(!rank_name||!Number.isFinite(required_hours)||required_hours<0||
+       !Number.isInteger(display_order)||display_order<0){
+      throw new Error("Enter a valid rank name, hour threshold and display order.");
+    }
+    const {error}=await client.from("pilot_ranks").upsert({
+      rank_name,required_hours,display_order
+    });
     if(error)throw error;
-    $("rankForm").reset();message("adminMessage","Rank created or updated.","success");await loadAdminRanks();await loadAdminPilots();
-  }catch(e2){message("adminMessage",friendly(e2),"error");}
+    $("rankForm").reset();
+    message("adminMessage","Rank created or updated.","success");
+    await loadAdminRanks();await loadAdminPilots();
+  }catch(e2){
+    message("adminMessage",friendly(e2),"error");
+  }
 });
 document.querySelectorAll("[data-admin-tab]").forEach(b=>b.addEventListener("click",()=>{
   const t=b.dataset.adminTab;
@@ -583,33 +812,41 @@ document.querySelectorAll("[data-admin-tab]").forEach(b=>b.addEventListener("cli
   $("adminPilotsTab").classList.toggle("hidden",t!=="pilots");
   $("adminRanksTab").classList.toggle("hidden",t!=="ranks");
 }));
-
 async function loadAirportIndex(){
   if(airportIndex)return airportIndex;
   message("mapMessage","Loading airport coordinates…","info");
   const response=await fetch("https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airports.csv");
   if(!response.ok)throw new Error("Airport coordinate dataset unavailable.");
   const lines=(await response.text()).split(/\r?\n/);
-  const headers=parseCsvLine(lines[0]),idx={};headers.forEach((h,i)=>idx[h]=i);
+  const headers=parseCsvLine(lines[0]),idx={};
+  headers.forEach((h,i)=>idx[h]=i);
   const result={};
   for(let i=1;i<lines.length;i++){
     if(!lines[i])continue;
-    const row=parseCsvLine(lines[i]),icao=(row[idx.gps_code]||row[idx.ident]||"").toUpperCase();
+    const row=parseCsvLine(lines[i]);
+    const icao=(row[idx.gps_code]||row[idx.ident]||"").toUpperCase();
     const lat=Number(row[idx.latitude_deg]),lon=Number(row[idx.longitude_deg]);
     if(icao.length===4&&Number.isFinite(lat)&&Number.isFinite(lon)&&
-      ["large_airport","medium_airport","small_airport"].includes(row[idx.type])&&!result[icao])result[icao]=[lat,lon];
+       ["large_airport","medium_airport","small_airport"].includes(row[idx.type])&&!result[icao]){
+      result[icao]=[lat,lon];
+    }
   }
-  airportIndex=result;return result;
+  airportIndex=result;
+  return result;
 }
 function parseCsvLine(line){
   const out=[];let v="",q=false;
   for(let i=0;i<line.length;i++){
     const c=line[i];
-    if(c==='"'){if(q&&line[i+1]==='"'){v+='"';i++;}else q=!q;}
-    else if(c===","&&!q){out.push(v);v="";}
-    else v+=c;
+    if(c==='"'){
+      if(q&&line[i+1]==='"'){v+='"';i++;}
+      else q=!q;
+    }else if(c===","&&!q){
+      out.push(v);v="";
+    }else v+=c;
   }
-  out.push(v);return out;
+  out.push(v);
+  return out;
 }
 async function initMap(){
   if(map||!window.L)return;
@@ -627,41 +864,77 @@ async function loadRoutes(){
   if(!map)return;
   routeLayer.clearLayers();
   const flights=allFlights.filter(f=>f.status==="approved");
-  if(!flights.length){message("mapMessage","No approved routes yet. Routes will appear after the first approved PIREP.","info");return;}
+  if(!flights.length){
+    message("mapMessage","No approved routes yet. Routes will appear after the first approved PIREP.","info");
+    return;
+  }
   try{
     const airports=await loadAirportIndex();let drawn=0;
     for(const f of flights){
-      const a=airports[(f.origin_icao||"").toUpperCase()],b=airports[(f.destination_icao||"").toUpperCase()];
+      const a=airports[(f.origin_icao||"").toUpperCase()];
+      const b=airports[(f.destination_icao||"").toUpperCase()];
       if(!a||!b)continue;
-      L.polyline([a,b],{color:"#00aaff",weight:3,opacity:.95}).addTo(routeLayer);
-      L.circleMarker(a,{radius:4,color:"#6de4ff",fillColor:"#007bff",fillOpacity:1}).addTo(routeLayer).bindTooltip(f.origin_icao);
-      L.circleMarker(b,{radius:4,color:"#6de4ff",fillColor:"#007bff",fillOpacity:1}).addTo(routeLayer).bindTooltip(f.destination_icao);
+      const pilot=pilotDisplayName(f.pilot_id);
+      const popup=
+        '<div style="min-width:190px;color:#102033">'+
+        '<strong>'+escapeHTML(pilot)+'</strong><br>'+
+        '<b>Aircraft:</b> '+escapeHTML(f.aircraft||"—")+'<br>'+
+        '<b>Origin:</b> '+escapeHTML(f.origin_icao||"—")+'<br>'+
+        '<b>Destination:</b> '+escapeHTML(f.destination_icao||"—")+'<br>'+
+        '<b>Flight duration:</b> '+escapeHTML(formatDuration(f.duration_minutes))+
+        '</div>';
+      L.polyline([a,b],{color:"#00aaff",weight:4,opacity:.95})
+        .addTo(routeLayer).bindPopup(popup);
+      L.circleMarker(a,{radius:4,color:"#6de4ff",fillColor:"#007bff",fillOpacity:1})
+        .addTo(routeLayer).bindTooltip(f.origin_icao).bindPopup(popup);
+      L.circleMarker(b,{radius:4,color:"#6de4ff",fillColor:"#007bff",fillOpacity:1})
+        .addTo(routeLayer).bindTooltip(f.destination_icao).bindPopup(popup);
       drawn++;
     }
     if(!drawn)message("mapMessage","Approved reports exist, but airport coordinates were not found for these routes.","info");
     else clearMessage("mapMessage");
-  }catch(e){message("mapMessage","Could not load map routes: "+friendly(e),"error");}
+  }catch(e){
+    message("mapMessage","Could not load map routes: "+friendly(e),"error");
+  }
 }
 async function refreshData(){
   try{
-    await getAllFlights();updateCompanyStats();renderCompanyFlights();await loadHistory();
-    updatePersonalUI();await loadRoutes();
-    if(isAdmin){await loadAdminFlights();await loadAdminPilots();await loadAdminRanks();}
+    await getAllFlights();
+    await loadPublicProfiles();
+    updateCompanyStats();
+    renderCompanyFlights();
+    await loadHistory();
+    updatePersonalUI();
+    await loadRoutes();
+    if(isAdmin){
+      await loadAdminFlights();
+      await loadAdminPilots();
+      await loadAdminRanks();
+    }
     clearMessage("dashboardMessage");
-  }catch(e){message("dashboardMessage",friendly(e),"error");}
+  }catch(e){
+    message("dashboardMessage",friendly(e),"error");
+  }
 }
 $("refreshButton").addEventListener("click",refreshData);
 $("refreshHistoryButton").addEventListener("click",refreshData);
-
 async function initialize(){
   try{
     validateConfig();
-    const {data,error}=await client.auth.getSession();if(error)throw error;
-    if(data.session?.user)await openDashboard(data.session.user);else showAuth();
+    const {data,error}=await client.auth.getSession();
+    if(error)throw error;
+    if(data.session?.user)await openDashboard(data.session.user);
+    else showAuth();
     client.auth.onAuthStateChange((event,session)=>{
-      if(event==="SIGNED_OUT"){currentUser=null;currentProfile=null;isAdmin=false;closeMenu();showAuth();}
+      if(event==="SIGNED_OUT"){
+        currentUser=null;currentProfile=null;isAdmin=false;
+        closeMenu();showAuth();
+      }
     });
-  }catch(e){showAuth();message("loginMessage",friendly(e),"error");}
+  }catch(e){
+    showAuth();
+    message("loginMessage",friendly(e),"error");
+  }
 }
 initialize();
 })();
