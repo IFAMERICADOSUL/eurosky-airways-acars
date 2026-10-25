@@ -1,18 +1,35 @@
+
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#071426">
+  <meta name="description" content="EuroSky Airways Virtual Airline — Flight Operations, Pilot Portal and Smart ACARS.">
   <title>EuroSky Airways | Virtual Airline</title>
+
   <style>
+    :root {
+      --background: #071426;
+      --panel: #102139;
+      --border: #263b54;
+      --text: #eef5ff;
+      --muted: #9db1c9;
+      --accent: #54c8ff;
+      --button: #168bd0;
+    }
+
     * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #071426;
-      color: #eef5ff;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--background);
+      color: var(--text);
     }
+
     header {
       padding: 20px 6%;
       display: flex;
@@ -20,115 +37,233 @@
       align-items: center;
       flex-wrap: wrap;
       gap: 16px;
-      border-bottom: 1px solid #263b54;
+      border-bottom: 1px solid var(--border);
     }
-    .logo { font-size: 23px; font-weight: 800; }
-    .logo span { color: #54c8ff; }
-    nav { display: flex; flex-wrap: wrap; gap: 18px; }
-    a { color: #c7d9ef; text-decoration: none; }
-    a:hover { color: #54c8ff; }
+
+    .logo {
+      font-size: 23px;
+      font-weight: 800;
+    }
+
+    .logo span { color: var(--accent); }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    a {
+      color: #c7d9ef;
+      text-decoration: none;
+    }
+
+    a:hover { color: var(--accent); }
+
     .hero {
-      padding: 75px 6%;
+      padding: 80px 6%;
       background: linear-gradient(120deg, #102c4c, #071426 75%);
     }
+
     .eyebrow {
-      color: #54c8ff;
+      color: var(--accent);
       letter-spacing: 3px;
       font-size: 12px;
       font-weight: bold;
     }
-    h1 { font-size: clamp(36px, 6vw, 64px); margin: 18px 0; }
-    .hero p { color: #b7c9de; max-width: 620px; line-height: 1.8; }
-    .buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+
+    h1 {
+      font-size: clamp(36px, 6vw, 64px);
+      margin: 18px 0;
+      line-height: 1.1;
+    }
+
+    .hero p {
+      color: #b7c9de;
+      max-width: 650px;
+      line-height: 1.8;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
     .button {
       display: inline-block;
       padding: 13px 20px;
       border-radius: 9px;
-      background: #168bd0;
+      background: var(--button);
       color: white;
       font-weight: bold;
+      border: 0;
+      cursor: pointer;
+      font-size: 14px;
     }
-    .button.outline { background: transparent; border: 1px solid #526b88; }
-    main { max-width: 1200px; margin: auto; padding: 38px 24px; }
+
+    .button.outline {
+      background: transparent;
+      border: 1px solid #526b88;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: auto;
+      padding: 38px 24px;
+    }
+
     h2 { font-size: 24px; }
+
     .stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
       gap: 15px;
     }
+
     .card {
-      background: #102139;
-      border: 1px solid #263b54;
+      background: var(--panel);
+      border: 1px solid var(--border);
       border-radius: 14px;
       padding: 22px;
     }
-    .number { font-size: 30px; font-weight: bold; margin: 12px 0; }
-    .muted { color: #9db1c9; font-size: 14px; line-height: 1.7; }
+
+    .number {
+      font-size: 30px;
+      font-weight: bold;
+      margin: 12px 0;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
     .section { margin-top: 45px; }
+
+    .status {
+      display: inline-block;
+      padding: 7px 10px;
+      border-radius: 6px;
+      background: #263950;
+      color: #d8e6f5;
+      font-size: 12px;
+    }
+
+    .status.pending { color: #ffd27a; }
+
+    .map-placeholder {
+      min-height: 220px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background-color: #0a1b2d;
+      background-image:
+        linear-gradient(#29445a55 1px, transparent 1px),
+        linear-gradient(90deg, #29445a55 1px, transparent 1px);
+      background-size: 32px 32px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 24px;
+      margin-top: 18px;
+    }
+
+    .plane { font-size: 42px; }
+
     footer {
-      border-top: 1px solid #263b54;
+      border-top: 1px solid var(--border);
       padding: 28px;
       text-align: center;
-      color: #9db1c9;
+      color: var(--muted);
+      margin-top: 30px;
     }
+
     @media (max-width: 600px) {
-      header { align-items: flex-start; flex-direction: column; }
-      .hero { padding-top: 50px; padding-bottom: 50px; }
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .hero {
+        padding-top: 50px;
+        padding-bottom: 50px;
+      }
+
+      nav { gap: 14px; }
     }
   </style>
 </head>
+
 <body>
   <header>
     <div class="logo">✈ EuroSky <span>Airways</span></div>
-    <nav>
+
+    <nav aria-label="Main navigation">
       <a href="#home">Home</a>
-      <a href="#statistics">Statistiche</a>
+      <a href="#statistics">Statistics</a>
       <a href="#acars">Smart ACARS</a>
-      <a href="#login">Login</a>
+      <a href="#live-map">Live Map</a>
+      <a href="#pilot-portal">Pilot Portal</a>
     </nav>
   </header>
 
   <section class="hero" id="home">
     <div class="eyebrow">VIRTUAL AIRLINE · FLIGHT OPERATIONS</div>
-    <h1>Il cielo è la nostra<br>destinazione.</h1>
+
+    <h1>The Sky Is<br>Our Destination.</h1>
+
     <p>
-      Benvenuto in EuroSky Airways, la compagnia aerea virtuale
-      dedicata agli appassionati di simulazione di volo.
-      Pianifica le tue rotte, registra i tuoi voli e vola con noi.
+      Welcome to EuroSky Airways, a virtual airline built for
+      flight simulation enthusiasts. Plan your routes, track
+      your flights and join our growing community of virtual pilots.
     </p>
+
     <div class="buttons">
-      <a class="button" href="#login">Diventa pilota</a>
-      <a class="button outline" href="#acars">Smart ACARS</a>
+      <a class="button" href="#pilot-portal">Become a Pilot</a>
+      <a class="button outline" href="#acars">Open Smart ACARS</a>
     </div>
   </section>
 
   <main>
     <section id="statistics">
-      <h2>EuroSky in numeri</h2>
+      <h2>EuroSky Airways at a Glance</h2>
+
       <p class="muted">
-        Le statistiche reali saranno disponibili dopo la configurazione
-        del database e la registrazione dei voli.
+        Company statistics will appear here once the database
+        and verified flight records are connected.
       </p>
+
       <div class="stats">
         <article class="card">
-          <div class="muted">Piloti registrati</div>
+          <div class="muted">Registered Pilots</div>
           <div class="number">—</div>
-          <div class="muted">In attesa del database</div>
+          <div class="muted">Total active and registered pilots</div>
         </article>
+
         <article class="card">
-          <div class="muted">Voli completati</div>
+          <div class="muted">Completed Flights</div>
           <div class="number">—</div>
-          <div class="muted">Voli verificati</div>
+          <div class="muted">Verified completed flights</div>
         </article>
+
         <article class="card">
-          <div class="muted">Ore di volo</div>
+          <div class="muted">Total Flight Hours</div>
           <div class="number">—</div>
-          <div class="muted">Totale compagnia</div>
+          <div class="muted">Combined company flight time</div>
         </article>
+
         <article class="card">
-          <div class="muted">Miglia nautiche</div>
+          <div class="muted">Nautical Miles Flown</div>
           <div class="number">—</div>
-          <div class="muted">Distanza complessiva</div>
+          <div class="muted">Total verified distance</div>
+        </article>
+
+        <article class="card">
+          <div class="muted">Most Flown Airport</div>
+          <div class="number">—</div>
+          <div class="muted">Based on recorded flight activity</div>
         </article>
       </div>
     </section>
@@ -136,28 +271,77 @@
     <section class="section" id="acars">
       <div class="card">
         <h2>Smart ACARS</h2>
+
         <p class="muted">
-          Il centro operativo per i piloti EuroSky Airways.
-          La connessione reale ad AeroFly FS Global sarà attivata
-          dopo aver verificato il protocollo della porta 58585.
+          Connect your AeroFly FS Global simulator, configure
+          your flight and submit your flight data to EuroSky Airways.
         </p>
-        <a class="button" href="#login">Accedi all'area pilota</a>
+
+        <p>
+          <span class="status pending">Simulator Integration Pending</span>
+        </p>
+
+        <p class="muted">
+          The ACARS connection will be enabled after the simulator
+          communication protocol and telemetry receiver are verified.
+        </p>
+
+        <a class="button" href="#pilot-portal">Access Pilot Portal</a>
       </div>
     </section>
 
-    <section class="section" id="login">
+    <section class="section" id="live-map">
       <div class="card">
-        <h2>Area pilota</h2>
+        <h2>Live Flight Tracking</h2>
+
         <p class="muted">
-          Login e registrazione saranno disponibili quando
-          configureremo il sistema di autenticazione sicuro.
+          Follow EuroSky Airways aircraft once live telemetry
+          becomes available.
+        </p>
+
+        <div class="map-placeholder">
+          <div>
+            <div class="plane">✈</div>
+            <h3>No Active Flights</h3>
+            <p class="muted">
+              Live aircraft positions will appear here
+              when the ACARS service is connected.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="pilot-portal">
+      <div class="card">
+        <h2>Pilot Portal</h2>
+
+        <p class="muted">
+          Sign in to access your pilot profile, flight history,
+          flight hours and personal statistics.
+        </p>
+
+        <p>
+          <span class="status pending">Authentication Setup Pending</span>
+        </p>
+
+        <p class="muted">
+          Account registration and secure sign-in will be enabled
+          after the authentication service is configured.
         </p>
       </div>
     </section>
   </main>
 
   <footer>
-    © EuroSky Airways · Virtual Airline · Smart ACARS
+    <strong>EuroSky Airways</strong>
+    <p class="muted">
+      Virtual Airline · Flight Operations · Smart ACARS
+    </p>
+    <p class="muted">
+      Independent virtual airline project. Not affiliated with
+      any real-world airline or simulator developer.
+    </p>
   </footer>
 </body>
 </html>
