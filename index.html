@@ -562,7 +562,7 @@ $("flightForm").addEventListener("submit",async e=>{
     await refreshData();
   }catch(e2){message("flightMessage",friendly(e2),"error");}
   finally{busy("flightButton",false);}
-}
+});
 
 async function loadAdminFlights(){
   if(!isAdmin)return;
@@ -859,7 +859,7 @@ $("uploadAvatarButton").addEventListener("click",async()=>{
     message("avatarMessage","Profile photo updated.","success");$("avatarFile").value="";
   }catch(e){message("avatarMessage",friendly(e),"error");}
   finally{busy("uploadAvatarButton",false);}
-}
+});
 
 /* MAPPA VOLI APPROVATI */
 async function loadAirportIndex(){
